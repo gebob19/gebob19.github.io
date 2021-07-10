@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>/normalizing-flows</loc>
+<lastmod>2019-07-17T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>/capsule-networks</loc>
+<lastmod>2019-08-03T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>/convex-optimization</loc>
+<lastmod>2020-04-19T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>/recursive-generative-models</loc>
+<lastmod>2020-07-23T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>/tfrecords</loc>
+<lastmod>2020-11-16T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>/about</loc>
+</url>
+<url>
+<loc>/</loc>
+</url>
+<url>
+<loc>/writing</loc>
+</url>
+</urlset>

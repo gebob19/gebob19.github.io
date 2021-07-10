@@ -1,0 +1,443 @@
+<!doctype html>
+<html>
+  <head>
+  <title>
+    
+      Generative Models: Recursive Edition | Brennan Gebotys
+    
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+  <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Brennan Gebotys" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="Brennan Gebotys | Machine Learning, Statistics, and All Things Cool"/>
+  //-->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+      });
+  </script>
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-112060364-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Generative Models: Recursive Edition | Brennan Gebotys</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Generative Models: Recursive Edition" />
+<meta name="author" content="Brennan Gebotys" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this tutorial we look at generative models which use recursive networks (RNN, LSTM, GRU, etc.) to generate time-series data." />
+<meta property="og:description" content="In this tutorial we look at generative models which use recursive networks (RNN, LSTM, GRU, etc.) to generate time-series data." />
+<meta property="og:site_name" content="Brennan Gebotys" />
+<meta property="og:image" content="/tiger.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-23T00:00:00-04:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="/tiger.jpg" />
+<meta property="twitter:title" content="Generative Models: Recursive Edition" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"/recursive-generative-models"},"url":"/recursive-generative-models","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"/tiger.jpg","description":"In this tutorial we look at generative models which use recursive networks (RNN, LSTM, GRU, etc.) to generate time-series data.","headline":"Generative Models: Recursive Edition","dateModified":"2020-07-23T00:00:00-04:00","datePublished":"2020-07-23T00:00:00-04:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+  <body>
+    <div class="container">
+      <header class="header">
+  <h3 class="header-title">
+    <a href="/">Brennan Gebotys</a>
+    <small class="header-subtitle">Machine Learning, Statistics, and All Things Cool</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/">Home</a>
+    
+      <a href="/writing.html">Compact Blog</a>
+    
+      <a href="/about.html">About</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+      <div class="content-container">
+        <h1>
+  Generative Models: Recursive Edition
+</h1>
+
+  <img src="/assets/img/tiger.jpg">
+
+<article>
+  <h1 id="introduction">Introduction</h1>
+
+<p>Generative Adversarial Networks (GANs) have shown great results in computer vision but how do they perform when applied to time-series data? Following this, do Convolutional Neural Networks (CNNs) or do Recursive Neural Networks (RNNs) achieve the best results?</p>
+
+<p>In this post, we discuss GAN implementations which aim to generate time-series data including, C-RNN-GANs <a class="citation" href="#mogren2016c">(Mogren, 2016)</a>, RC-GANs <a class="citation" href="#esteban2017real">(Esteban et al., 2017)</a> and TimeGANs <a class="citation" href="#yoon2019time">(Yoon et al., 2019)</a>. Lastly, we implement RC-GAN and generate stock data.</p>
+
+<h1 id="basic-gan-intro">Basic GAN Intro</h1>
+
+<p>There are many great resources on GANs so I only provide an introduction here.</p>
+
+<p>GANs include a generator and a discriminator. The generator takes latent variables as input (usually values sampled from a normal distribution) and outputs generated data. The discriminator takes the data (real or generated/fake) as input and learns to discriminate between the two.</p>
+
+<p>The gradients of the discriminator are used both to improve the discriminator and improve the generator.</p>
+
+<p>Here’s a nice picture for the more visually inclined from a wonderful <a href="https://robotronblog.com/2017/09/05/gans/">blog</a>.</p>
+
+<div align="center">
+<img src="https://robotronblog.files.wordpress.com/2017/09/g1.jpg" alt="GAN-description" width="600" class="center" />
+</div>
+
+<p>and a nice equation for the more equation-y inclined where \(D\) is the discriminator and \(G\) is the generator.</p>
+
+\[\min_G \max_D \mathbb{E}_{x\sim p_{data}(x)}[\log D(x)] + \mathbb{E}_{z\sim p_z(z)}[\log(1 - D(G(z)))]\]
+
+<h1 id="c-rnn-gan">C-RNN-GAN</h1>
+
+<p>The first paper we investigate is ‘Continuous recurrent neural networks with adversarial training’ (C-RNN-GAN) <a class="citation" href="#mogren2016c">(Mogren, 2016)</a>.</p>
+
+<p>The generative model takes a latent variable concatenated with the previous output as input. Data is then generated using an RNN and a fully connected layer.</p>
+
+<!-- <div align="center">
+<img src="https://gebob19.github.io/assets/recursive_gan/c-rnn.png" alt="C-RNN-GAN" width="600" class="center"/>
+</div> -->
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/c-rnn6.png" alt="C-RNN-GAN" class="center" />
+</div>
+
+<p>Note: In the paper, <code class="language-plaintext highlighter-rouge">start</code> is initialized from Uniform [-1, 1].</p>
+
+<p>The discriminator is a bi-directional RNN followed by a fully connected layer.</p>
+
+<p>The generator is implemented in PyTorch as follows,</p>
+
+<script src="https://gist.github.com/gebob19/b379123b493fb5db035d93c171947e0b.js"></script>
+
+<h1 id="rc-gan">RC-GAN</h1>
+
+<p>The next paper is ‘Real-Valued (Medical) Time Series Generation With Recurrent Conditional GANs’ <a class="citation" href="#esteban2017real">(Esteban et al., 2017)</a>.</p>
+
+<p>RC-GAN’s generator’s input consists of a sequence of latent variables.</p>
+
+<p>The paper also introduces a ‘conditional’ GAN, where conditional/static information (\(c\)) is concatenated to the latent variables and used as input to improve training.</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/cr-gan.png" alt="CR-GAN" class="center" />
+</div>
+
+<p>The discriminator is the same as in C-RNN-GAN but is not bi-directional.</p>
+
+<p>The implementation is as follows,</p>
+
+<script src="https://gist.github.com/gebob19/bcbe223c0ae39412ebe93a6fe8c23048.js"></script>
+
+<h1 id="time-gan">Time-GAN</h1>
+
+<p>TimeGan <a class="citation" href="#yoon2019time">(Yoon et al., 2019)</a> is the most recent approach, which aims to maximize the similarities between embeddings of real data and fake data.</p>
+
+<p>First, the generator (\(G\)) creates embeddings (\(\hat{h_t} = G(\hat{h_{t-1}}, z_t)\)) from latent variables while the embedding network (\(E\)) encodes real data (\(h_t = E(h_{t-1}, x_t)\)). The Discriminator (\(D\)) then discriminates between real and fake embeddings. While the Recovery network (\(R\)) reconstructs the real data (creating \(\hat{x_t}\)) from its respective embedding.</p>
+
+<p>This leads to 3 losses</p>
+
+<ul>
+  <li>Embedding difference (Goal: Similar embeddings for real and fake data)</li>
+</ul>
+
+\[L_S = \mathbb{E}_{x_{1:T} \sim p} \sum_t || h_t - G(h_{t-1}, z_t) ||\]
+
+<p>Notice: \(G\) takes \(h_{t-1}\) as input, NOT \(\hat{h_{t-1}}\)</p>
+
+<ul>
+  <li>Recovery Score (Goal: meaningful embeddings for real data)</li>
+</ul>
+
+\[L_R = \mathbb{E}_{x_{1:T} \sim p} \sum_t ||x_t - \tilde{x_t} ||\]
+
+<ul>
+  <li>Discriminator Score</li>
+</ul>
+
+\[L_U = \mathbb{E}_{x_{1:T} \sim p} \sum_t log(y_t) +  \mathbb{E}_{x_{1:T} \sim \hat{p}} \sum_t log(1 - \hat{y_t})\]
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/timegan2.png" alt="Time-GAN" class="center" />
+</div>
+
+<p>Note: Similar to the previous paper, the paper talks about static/context features which can be used throughout the training process (E.g the label (1, 2, …, 9) when generating the MNIST dataset). To simplify this post, I chose to sweep this little detail under the blogpost rug.</p>
+
+<p>To complete the optimization, the total loss is weighed by two hyperparameters \(\lambda\) and \(\eta\) (whos values were found to be non-significant). Leading to the following…</p>
+
+\[\min_{E, R} \lambda L_S + L_R\]
+
+\[\min_{G} \eta L_S + \max_{D} L_U\]
+
+<h2 id="empirical-results">Empirical Results</h2>
+
+<p>Below are the results comparing time-series focused, generative models. We can see that TimeGAN performs the best across all datasets with RC-GAN close behind. For a more detailed explanation of the data, refer to the paper.</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/results.png" alt="table results from TimeGAN" class="center" width="400" height="100" />
+</div>
+
+<h1 id="rc-gan--stock-data">RC-GAN + Stock Data</h1>
+
+<p>Since both RC-GAN and TimeGAN show similar results and RC-GAN is a much simpler approach we will implement and investigate RC-GAN.</p>
+
+<h3 id="generator-and-discriminator">Generator and Discriminator</h3>
+
+<script src="https://gist.github.com/gebob19/201691dca85d9e766a9b5b896824dc44.js"></script>
+
+<h3 id="training-loop">Training Loop</h3>
+
+<script src="https://gist.github.com/gebob19/4f95f82c80f8ff7f1122c5897a6db877.js"></script>
+
+<h2 id="visualizing-stock-data">Visualizing Stock Data</h2>
+
+<p>Before we generate stock data, we need to understand how stock data is visualized.</p>
+
+<p>Every day, the price which the stock opened and closed at, and the highest and lowest price the stock reached that day is represented using a candlestick.</p>
+
+<p>If the stock closed higher than it opened, the candle is filled green. If the stock closed lower than it opened, then the candle is filled red.</p>
+
+<p>Nice!</p>
+
+<div align="center" width="600" height="300">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/candlesticks.jpg" alt="candlestick_model" class="center" width="600" height="300" />
+</div>
+
+<h3 id="examples">Examples</h3>
+
+<p>The model was trained with the GOOGLE price data split into 30-day parts (used in the TimeGAN paper).</p>
+
+<p>Below are some generated data along with low-dimension analysis using T-SNE.</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/ex/s1.png" alt="examples" class="center" width="400" height="100" />
+</div>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/ex/s2.png" alt="examples" class="center" width="400" height="100" />
+</div>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/ex/s3.png" alt="examples" class="center" width="400" height="100" />
+</div>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/ex/tsne.png" alt="examples" class="center" width="400" height="100" />
+</div>
+
+<p>Though it looks that the examples overlap through a T-SNE visualization, they do not always look realistic.</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/ex/s4.png" alt="tsne-overlap" class="center" width="400" height="100" />
+</div>
+
+<h2 id="feature-association">Feature Association</h2>
+
+<p>We can also investigate what the learned features associate with by shifting the axis values around in latent space. Since we trained our model with a \(z\) dimension of 10 we can shift the value of each of these dimensions and see how it changes the generated stock data.</p>
+
+<h3 id="original-generated-data">[Original Generated Data]</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/og.png" alt="original-data" class="center" width="700" height="200" />
+</div>
+
+<h2 id="shifting-noise-axis-values--1--05-05-1">Shifting Noise Axis Values [-1, -0.5, +0.5, +1]</h2>
+
+<h3 id="index-0">Index 0</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features0.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-1">Index 1</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features1.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-2">Index 2</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features2.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-3">Index 3</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features3.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-4">Index 4</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features4.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-5">Index 5</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features5.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-6">Index 6</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features6.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-7">Index 7</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features7.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-8">Index 8</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features8.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<h3 id="index-9">Index 9</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/recursive_gan/features/features9.png" alt="feature" class="center" width="700" height="200" />
+</div>
+
+<p>There is also a <a href="https://github.com/gebob19/RNN_stock_generation">notebook</a> which contains all the code needed to test this out for yourself!</p>
+
+<p>If you enjoyed the post, feel free to follow me on <a href="https://twitter.com/brennangebotys">Twitter</a> for updates on new posts!</p>
+
+<h1 id="references">References</h1>
+
+<ol class="bibliography"><li><span id="mogren2016c">Mogren, O. (2016). C-RNN-GAN: Continuous recurrent neural networks with adversarial training. <i>ArXiv Preprint ArXiv:1611.09904</i>.</span></li>
+<li><span id="esteban2017real">Esteban, C., Hyland, S. L., &amp; Rätsch, G. (2017). Real-valued (medical) time series generation with recurrent conditional gans. <i>ArXiv Preprint ArXiv:1706.02633</i>.</span></li>
+<li><span id="yoon2019time">Yoon, J., Jarrett, D., &amp; van der Schaar, M. (2019). Time-series generative adversarial networks. <i>Advances in Neural Information Processing Systems</i>, 5508–5518.</span></li></ol>
+
+</article>
+
+  <span class="post-date">
+  Written on
+  
+  July
+  23rd
+    ,
+  2020
+  by
+  
+    Brennan Gebotys
+  
+</span>
+
+
+
+  <div class="post-date">Feel free to share!</div>
+<div class="sharing-icons">
+  <a href="https://twitter.com/intent/tweet?text=Generative Models: Recursive Edition&amp;url=/recursive-generative-models" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=/recursive-generative-models&amp;title=Generative Models: Recursive Edition" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+</div>
+
+
+
+  <div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+          <li>
+            <h3>
+              <a href="/tfrecords">
+                Video TFRecords: How to Efficiently Load Video Data
+                <!--<img src="/images/">-->
+                <!--<small>November 16, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/convex-optimization">
+                Convex Optimization: Algorithms and their Rate of Convergence
+                <!--<img src="/images/">-->
+                <!--<small>April 19, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+      </div>
+      <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="footer-description"><a href="/">Brennan Gebotys | Machine Learning, Statistics, and All Things Cool by Brennan Gebotys</a></div>
+</footer>
+
+    </div>
+  </body>
+</html>

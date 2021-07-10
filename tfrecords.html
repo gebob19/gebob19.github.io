@@ -1,0 +1,283 @@
+<!doctype html>
+<html>
+  <head>
+  <title>
+    
+      Video TFRecords: How to Efficiently Load Video Data | Brennan Gebotys
+    
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+  <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Brennan Gebotys" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="Brennan Gebotys | Machine Learning, Statistics, and All Things Cool"/>
+  //-->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+      });
+  </script>
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-112060364-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Video TFRecords: How to Efficiently Load Video Data | Brennan Gebotys</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Video TFRecords: How to Efficiently Load Video Data" />
+<meta name="author" content="Brennan Gebotys" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this brief tutorial/example, I explain the best way to store videos in TfRecords for more efficient and faster model training in TensorFlow version 1 / 1.15.0 ." />
+<meta property="og:description" content="In this brief tutorial/example, I explain the best way to store videos in TfRecords for more efficient and faster model training in TensorFlow version 1 / 1.15.0 ." />
+<meta property="og:site_name" content="Brennan Gebotys" />
+<meta property="og:image" content="/lion.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-16T00:00:00-05:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="/lion.jpg" />
+<meta property="twitter:title" content="Video TFRecords: How to Efficiently Load Video Data" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"/tfrecords"},"url":"/tfrecords","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"/lion.jpg","description":"In this brief tutorial/example, I explain the best way to store videos in TfRecords for more efficient and faster model training in TensorFlow version 1 / 1.15.0 .","headline":"Video TFRecords: How to Efficiently Load Video Data","dateModified":"2020-11-16T00:00:00-05:00","datePublished":"2020-11-16T00:00:00-05:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+  <body>
+    <div class="container">
+      <header class="header">
+  <h3 class="header-title">
+    <a href="/">Brennan Gebotys</a>
+    <small class="header-subtitle">Machine Learning, Statistics, and All Things Cool</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/">Home</a>
+    
+      <a href="/writing.html">Compact Blog</a>
+    
+      <a href="/about.html">About</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+      <div class="content-container">
+        <h1>
+  Video TFRecords: How to Efficiently Load Video Data
+</h1>
+
+  <img src="/assets/img/lion.jpg">
+
+<article>
+  <h1 id="introduction">Introduction</h1>
+
+<p>Compared to images, loading video data is expensive due to the I/O bottleneck and increased decoding time. This reduces efficiency leading to significantly longer training times. Reading online, there are generally two solutions for data loading videos:</p>
+
+<ol>
+  <li>Decode the video and save its matrix as is</li>
+</ol>
+
+<ul>
+  <li>With this approach, we improve the speed by preprocessing the decoding; however, we aren’t compressing, so storing a few videos which total a couple MBs ends up requiring a few GBs; not very memory efficient.</li>
+</ul>
+
+<ol>
+  <li>Store the frames of the video as images using a folder filesystem</li>
+</ol>
+
+<ul>
+  <li>With this approach, the I/O limitations are reduced by reading the images directly and we take advantage of compression algorithms like JPEG. However, it would also require a large folder re-organization which isn’t optimal.</li>
+</ul>
+
+<p>The solution I came up with and will share with you is to store the video as a list of encoded images using TFRecords. This significantly improves data loading throughput (by at least 2x) without incurring large memory costs (maintains the same size).</p>
+
+<h1 id="setup">Setup</h1>
+
+<h3 id="software">Software</h3>
+
+<p>This code is written in <code class="language-plaintext highlighter-rouge">Tensorflow 1.15.0</code>; it should also work with <code class="language-plaintext highlighter-rouge">Tensorflow 2</code>.</p>
+
+<h3 id="data-format">Data format</h3>
+
+<p>For this tutorial we need a <code class="language-plaintext highlighter-rouge">.txt</code> file for train, validation and test which is formatted like the following:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{mp4 file path} {label}
+</code></pre></div></div>
+
+<p>For example, one line would look like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>videos/54838.mp4 1951
+</code></pre></div></div>
+
+<h1 id="creating-the-tfrecords">Creating the TFRecords</h1>
+
+<p>First, we look at how we create a TFRecord example from a video example.</p>
+
+<script src="https://gist.github.com/gebob19/4c4bcc6c04f5fb329e8d3b7570c84d4b.js"></script>
+
+<p>Then we loop through our dataset and save each example into a TFRecord.</p>
+
+<script src="https://gist.github.com/gebob19/47b2e4be6c486f0e0caa7b62fcc9bd86.js"></script>
+
+<h1 id="reading-the-tfrecord">Reading the TFRecord</h1>
+
+<p>The most difficult part was figuring out how to decode the sequential frame data.</p>
+
+<p>With simple solutions not working, being unable to find online resources and on top of it all working in mysterious bytes I created the solution through brute force. The result was a magical TensorFlow while loop.</p>
+
+<script src="https://gist.github.com/gebob19/d4b14798a7dce32e7c684f261d4662bf.js"></script>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>That’s it! Now you know how to encode and decode video data efficiently using TFRecords, happy hacking! :)</p>
+
+<p>A repo containing the full code can be found <a href="https://github.com/gebob19/TFRecords_4_videos">here</a>!</p>
+
+<p>If you enjoyed this post, you may enjoy my other posts! If you want to stay up to date you can find me on my <a href="https://github.com/gebob19">Github</a> or <a href="https://twitter.com/brennangebotys">Twitter</a></p>
+
+<h3 id="why-i-made-this">Why I made this</h3>
+<ul>
+  <li>Difficult to find resources which are compatible with <code class="language-plaintext highlighter-rouge">Tensorflow 1.15.0</code> (mostly because <code class="language-plaintext highlighter-rouge">Tensorflow 2.0</code> is out)</li>
+  <li>Lack of quality resources on how to use TFRecords with video data</li>
+  <li>Imo this is the best way to data load video data using Tensorflow</li>
+  <li>With video processing being such a cool field I’m sure many others will find this information useful in future research!</li>
+</ul>
+
+</article>
+
+  <span class="post-date">
+  Written on
+  
+  November
+  16th,
+  2020
+  by
+  
+    Brennan Gebotys
+  
+</span>
+
+
+
+  <div class="post-date">Feel free to share!</div>
+<div class="sharing-icons">
+  <a href="https://twitter.com/intent/tweet?text=Video TFRecords: How to Efficiently Load Video Data&amp;url=/tfrecords" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=/tfrecords&amp;title=Video TFRecords: How to Efficiently Load Video Data" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+</div>
+
+
+
+  <div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/recursive-generative-models">
+                Generative Models: Recursive Edition
+                <!--<img src="/images/">-->
+                <!--<small>July 23, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/convex-optimization">
+                Convex Optimization: Algorithms and their Rate of Convergence
+                <!--<img src="/images/">-->
+                <!--<small>April 19, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+      </div>
+      <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="footer-description"><a href="/">Brennan Gebotys | Machine Learning, Statistics, and All Things Cool by Brennan Gebotys</a></div>
+</footer>
+
+    </div>
+  </body>
+</html>
