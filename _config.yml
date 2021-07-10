@@ -17,6 +17,7 @@ paginate:            100
 markdown:            kramdown
 highlighter:         rouge
 permalink:           /:title
+url: "https://gebob19.github.io" # the base hostname & protocol for your site
 plugins:             
  - jekyll-paginate
  - jekyll-sitemap
