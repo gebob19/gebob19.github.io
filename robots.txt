@@ -1,1 +1,1 @@
-Sitemap: /sitemap.xml
+Sitemap: https://gebob19.github.io/sitemap.xml
