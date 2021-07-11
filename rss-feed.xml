@@ -10,7 +10,7 @@
 				<title>Video TFRecords: How to Efficiently Load Video Data</title>
 				
 				
-					<description>&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
+					<description>&lt;p&gt;Compared to images, loading video data is expensive due to the I/O bottleneck and increased decoding time. This reduces efficiency leading to significantly longer training times. Reading online, there are generally two solutions for data loading videos:&lt;/p&gt;
 </description>
 				
 				<pubDate>Mon, 16 Nov 2020 00:00:00 -0500</pubDate>
@@ -22,7 +22,7 @@
 				<title>Generative Models: Recursive Edition</title>
 				
 				
-					<description>&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
+					<description>&lt;p&gt;Generative Adversarial Networks (GANs) have shown great results in computer vision but how do they perform when applied to time-series data? Following this, do Convolutional Neural Networks (CNNs) or do Recursive Neural Networks (RNNs) achieve the best results?&lt;/p&gt;
 </description>
 				
 				<pubDate>Thu, 23 Jul 2020 00:00:00 -0400</pubDate>
@@ -46,7 +46,7 @@
 				<title>Encapsulating Capsule Networks: Everything You Need To Know</title>
 				
 				
-					<description>&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
+					<description>&lt;p&gt;When applying Convolutional Neural Networks (CNNs) &lt;a class=&quot;citation&quot; href=&quot;#NIPS1989_293&quot;&gt;(LeCun et al., 1990)&lt;/a&gt; to a computer vision task, a change in viewpoint (change in orientation, position, shear, etc.) is likely to lead to drastically different network activations, hindering the model’s ability to generalize. To solve this problem, current CNNs require a large number of parameters, datasets and computational power.&lt;/p&gt;
 </description>
 				
 				<pubDate>Sat, 03 Aug 2019 00:00:00 -0400</pubDate>
