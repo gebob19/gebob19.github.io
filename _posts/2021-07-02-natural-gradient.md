@@ -19,7 +19,7 @@ $$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{arg
 
 where $$\lambda$$ controls how much the weights change between iterations.
 
-## Euclidean Space
+# Euclidean Space
 
 For example, in Euclidean space we could define $$\rho$$ to be the 2-norm:
 
@@ -43,7 +43,7 @@ Note that $$\nabla L$$ is defined at $$w^*$$ which we can't directly compute. Bu
 
 To solve this there are a few approximations we could use...
 
-## First Order Approximation of $$L$$ around $$w^{(k)}$$
+# First Order Approximation of $$L$$ around $$w^{(k)}$$
 
 Lets say we approximate $$L(w^{(k+1)})$$ with a first order taylor series around $$w^{(k)}$$:
 
@@ -74,7 +74,7 @@ $$
 
 This is the gradient descent equation. Then in Euclidean space, proximal policy optimiztion is the same as regular gradient descent. Interesting! 
 
-## Use a Second Order Approximation of $$\rho$$
+# Use a Second Order Approximation of $$\rho$$
 
 Another way we could solve the equation is to use a second order approximation of $$\rho$$ and let $$\lambda \rightarrow \infty$$ (we want our steps to be as close as possible). 
 
@@ -118,9 +118,9 @@ w^* &= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 &= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) 
 \end{align*}$$
 
-Though this doesn't conclude anything new, this simple example shows that we can use a second-order approximation for $$\rho$$ and derive an accurate update rule. 
+Though this doesn't conclude anything new compared to the previous section, this simple example shows that we can use a second-order approximation for $$\rho$$ and derive an accurate update rule which will be useful for later. 
 
-## KL Divergence
+# KL Divergence
 
 A problem which occus is that Euclidean space isn't always great (taken from [here](https://wiseodd.github.io/about/)): 
 
@@ -166,8 +166,6 @@ $$\begin{align*}
 &= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
 \end{align*}$$
 
-...
-
 $$\begin{align*}
 
 \nabla \rho = \nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
@@ -176,8 +174,6 @@ $$\begin{align*}
 &= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta') \text{d}x
 
 \end{align*}$$
-
-...
 
 $$\begin{align*}
 \nabla^2 \rho = \nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') \text{d}x \\
@@ -203,7 +199,6 @@ $$\begin{align*}
 &= 0
 \end{align*}$$
 
-...
 
 $$\begin{align*}
 \nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') |_{\theta' = \theta} \text{d}x \\
@@ -228,7 +223,7 @@ $$\begin{align*}
 
 Where $$\tilde{\nabla} L(\theta^k)$$ is called the **natural gradient**. And this update rule is called **natural gradient descent**. 
 
-But how do we apply it to neural networks? 
+> "But how do we apply it to neural networks?"
 
 # Natural Gradient Descent for Neural Nets 
 
@@ -350,7 +345,7 @@ Tada! Done! Last but not least we define some boilerplate training code and comp
 
 ## Results 
 
-*Note:* In the code, the gradients actually blow up. I think this is because our $$\lambda \rightarrow \infty$$ doesn't hold in practice and so $$\lambda^{-1} \text{F}_w^{-1} \rightarrow \text{F}_w^{-1}$$ results in very large gradient values. To get around this I use gradient clipping. 
+*Note:* In the code, the gradients actually blow up (to values up to `1e+20`). I think this is because our $$\lambda \rightarrow \infty$$ doesn't hold in practice and so $$\lambda^{-1} \text{F}_w^{-1} \rightarrow \text{F}_w^{-1}$$ results in very large gradient values. To get around this, I use gradient clipping (bc I didn't want to search for the learning rate in this simple example). 
 
 Here are the tensorboard results: 
 
