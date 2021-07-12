@@ -15,7 +15,7 @@ Suppose normal optimization is noisy, has high variance, or for whatever reason 
 
 We can then add another term to our loss function $$\rho(w^{(k)}, w^{(k+1)})$$ which minimizes how much the weights change between iterations like so: 
 
-$$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\argmin} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ]$$
+$$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ]$$
 
 where $$\lambda$$ controls how much the weights change between iterations.
 
@@ -23,11 +23,11 @@ where $$\lambda$$ controls how much the weights change between iterations.
 
 For example, in Euclidean space we could define $$\rho$$ to be the 2-norm:
 
-$$\rho(w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} ||w^{(k+1)} - w^{(k)}||^2$$)
+$$\rho(w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} \| w^{(k+1)} - w^{(k)}\|^2$$
 
 And so in Euc space we get: 
 
-$$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\argmin} [ L(w^{(k+1)}) + \lambda \dfrac{1}{2} ||w^{(k+1)} - w^{(k)}||^2 ]$$
+$$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \dfrac{1}{2} \|w^{(k+1)} - w^{(k)}\|^2 ]$$
 
 Lets try to solve for the optimum (i.e $$w^{(k+1)} = w^*$$) by computing the grad and setting to 0. If we do so, we get 
 
@@ -55,13 +55,13 @@ Then substituting this in to our loss we get:
 
 $$\begin{align*}
 
-\text{prox}_{L, \lambda}(w^{(k)}) =& \underset{w^{(k+1)}}{\argmin} [ L(w^{(k+1)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
-\approx& \underset{w^{(k+1)}}{\argmin} [ L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
-=& \underset{w^{(k+1)}}{\argmin} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+\text{prox}_{L, \lambda}(w^{(k)}) =& \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+\approx& \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+=& \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
 
 \end{align*}$$
 
-Note we go from the second to the third line since $$\underset{w^{(k+1)}}{\argmin}$$ ignores any terms without $$w^{(k+1)}$$. 
+Note we go from the second to the third line since $$\underset{w^{(k+1)}}{\text{argmin}}$$ ignores any terms without $$w^{(k+1)}$$. 
 
 Computing the gradient wtr to $$w^{(k+1)}$$ and setting it to zero again we get 
 
@@ -82,7 +82,7 @@ Another way we could solve the equation is to use a second order approximation o
 
 Since $$\lambda \rightarrow \infty$$, in Euclidean space, $$w^{(k+1)} \approx w^{(k)}$$ and so $$\rho (w^{(k+1)}, w^{(k)}) = 0$$ and $$\nabla \rho (w^{(k+1)}, w^{(k)}) = 0$$
 
-$$\rho (w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} ||w^{(k)} - w^{(k+1)} ||^2 \approx \dfrac{1}{2} ||w^{(k)} - w^{(k)} ||^2 = 0$$ 
+$$\rho (w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} \|w^{(k)} - w^{(k+1)} \|^2 \approx \dfrac{1}{2} \|w^{(k)} - w^{(k)} \|^2 = 0$$ 
 
 and 
 
@@ -95,13 +95,13 @@ $$\begin{align*}
 &= \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})
 \end{align*}$$
 
-where $$ G = \nabla^2 \rho (w^{(k+1)}, w^{(k)}) |_{w^{(k+1)} = w^{(k)}} $$. 
+where $$ G = \nabla^2 \rho (w^{(k+1)}, w^{(k)}) \vert_{w^{(k+1)} = w^{(k)}} $$. 
 
 Using the second-order approx of $$\rho$$ with the first-order approx of $$L$$ which we derived last section we get the following: 
 
 $$\begin{align*}
-\text{prox}_{L, \lambda}(w^{(k)}) =& \underset{w^{(k+1)}}{\argmin} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ] \\
-\approx& \underset{w^{(k+1)}}{\argmin} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})]
+\text{prox}_{L, \lambda}(w^{(k)}) =& \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ] \\
+\approx& \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})]
 \end{align*}$$
 
 Computing the gradient and setting it = 0 we get:
@@ -124,66 +124,71 @@ Though this doesn't conclude anything new, this simple example shows that we can
 
 A problem which occus is that Euclidean space isn't always great (taken from [here](https://wiseodd.github.io/about/)): 
 
-![](param_space_dist.png)
-![](param_space_dist2.png)
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist.png" alt="test-acc" class="center"/>
+</div>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist2.png" alt="test-acc" class="center"/>
+</div>
 
 In this example, both images, the Euclidean distance (red line), or the **parameter space**, of the Gaussians are the same (i.e 4). However, we see that the distrbutions should not have the same distance metric (the top image should have a smaller distance than the bottom image). KL-Divergence accounts for this and measures the distance in **distribution space**.
 
-Specifically, KL-Divergence measures the distance between two distributions $$p(x | \theta')$$ and $$p(x | \theta)$$ and is defined as: 
+Specifically, KL-Divergence measures the distance between two distributions $$p(x \vert \theta')$$ and $$p(x \vert \theta)$$ and is defined as: 
 
 $$\begin{align*}
-D_{KL}[p(x | \theta) || p(x | \theta')] &= \sum_x p(x|\theta) [\log \dfrac{p(x | \theta)}{p(x | \theta')}] \\
-&= \sum_x p(x|\theta) [\log p(x | \theta) - \log p(x | \theta')] \\
-&= \mathbb{E}_{p(x | \theta)} [\log p(x | \theta) - \log p(x | \theta')] \\
+D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= \sum_x p(x|\theta) [\log \dfrac{p(x \vert \theta)}{p(x \vert \theta')}] \\
+&= \sum_x p(x|\theta) [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+&= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
 \end{align*}$$
 
-KL measures the distance between distributions so it cant directly be applyed to neural nets with weights $$w$$. To show this difference we let $$\theta^{(k)}$$ parameterize some distribution $$p(x | \theta^{(k)})$$ at the $$k$$-th step of optimization. 
+KL measures the distance between distributions so it cant directly be applyed to neural nets with weights $$w$$. To show this difference we let $$\theta^{(k)}$$ parameterize some distribution $$p(x \vert \theta^{(k)})$$ at the $$k$$-th step of optimization. 
 
 *Teaser:* We'll see how to apply this to neural nets later. 
 
-Similar to before, lets assume we want $$\theta^{(k)}$$ and $$\theta^{(k+1)}$$ to be close across steps. Then we can let $$\rho(\theta^{(k)}, \theta^{(k+1)}) = D_{KL}(p_{\theta^{(k)}} || p_{\theta^{(k+1)}})$$ with the shorthand $$p_{\theta^{(k)}} = p(x | \theta^{(k)})$$.
+Similar to before, lets assume we want $$\theta^{(k)}$$ and $$\theta^{(k+1)}$$ to be close across steps. Then we can let $$\rho(\theta^{(k)}, \theta^{(k+1)}) = D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})$$ with the shorthand $$p_{\theta^{(k)}} = p(x \vert \theta^{(k)})$$.
 
 Now we want to follow a similar procedure from the last section and solve 
 
 $$\begin{align*}
-\text{prox}_{L, \lambda}(\theta^{(k)}) =& \underset{\theta^{(k+1)}}{\argmin} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
-=& \underset{\theta^{(k+1)}}{\argmin} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} || p_{\theta^{(k+1)}}) ] \\ 
+\text{prox}_{L, \lambda}(\theta^{(k)}) =& \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
+=& \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
 \end{align*}$$
 
-Similar to last section, lets approximate $$D_{KL}(p_{\theta^{(k)}} || p_{\theta^{(k+1)}})$$ with a second-order taylor expansion.
+Similar to last section, lets approximate $$D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})$$ with a second-order taylor expansion.
 
-Recall from the previous section to approximate $$\rho$$ with a second-order taylor series we need to define $$\rho|_{\theta'=\theta}$$, $$\nabla \rho|_{\theta'=\theta}$$ and $$\nabla^2 \rho|_{\theta'=\theta}$$.  
+Recall from the previous section to approximate $$\rho$$ with a second-order taylor series we need to define $$\rho\vert_{\theta'=\theta}$$, $$\nabla \rho\vert_{\theta'=\theta}$$ and $$\nabla^2 \rho\vert_{\theta'=\theta}$$.  
 
 First, lets derive $$\rho$$, $$\nabla \rho$$, and $$\nabla^2 \rho$$ for $$D_{KL}$$
 
 $$\begin{align*}
-\rho = D_{KL}[p(x | \theta) || p(x | \theta')] &= \mathbb{E}_{p(x | \theta)} [\log p(x | \theta) - \log p(x | \theta')] \\
-&= \mathbb{E}_{p(x | \theta)} [\log p(x | \theta)] - \mathbb{E}_{p(x | \theta)}[\log p(x | \theta')] \\
+\rho = D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+&= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
 \end{align*}$$
 
 ...
 
 $$\begin{align*}
 
-\nabla \rho = \nabla_{\theta'} D_{KL}[p(x | \theta) || p(x | \theta')] &= \nabla_{\theta'} \mathbb{E}_{p(x | \theta)} [\log p(x | \theta)] - \nabla_{\theta'} \mathbb{E}_{p(x | \theta)}[\log p(x | \theta')] \\
-&= - \nabla_{\theta'} \mathbb{E}_{p(x | \theta)}[\log p(x | \theta')] \\
-&= - \nabla_{\theta'} \int p(x | \theta) \log p(x | \theta') \text{d}x \\
-&= - \int p(x | \theta) \nabla_{\theta'} \log p(x | \theta') \text{d}x
+\nabla \rho = \nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+&= - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+&= - \nabla_{\theta'} \int p(x \vert \theta) \log p(x \vert \theta') \text{d}x \\
+&= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta') \text{d}x
 
 \end{align*}$$
 
 ...
 
 $$\begin{align*}
-\nabla^2 \rho = \nabla_{\theta'}^2 D_{KL}[p(x | \theta) || p(x | \theta')] &= - \int p(x | \theta) \nabla_{\theta'}^2 \log p(x | \theta') \text{d}x \\
+\nabla^2 \rho = \nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') \text{d}x \\
 \end{align*}$$
 
-To evaluate $$\rho|_{\theta'=\theta}$$, $$\nabla \rho|_{\theta'=\theta}$$ and $$\nabla^2 \rho|_{\theta'=\theta}$$ we are going to need the two following equations: 
+To evaluate $$\rho\vert_{\theta'=\theta}$$, $$\nabla \rho\vert_{\theta'=\theta}$$ and $$\nabla^2 \rho \vert_{\theta'=\theta}$$ we are going to need the two following equations: 
 
-$$\mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x | \theta)] = 0$$
+$$\mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] = 0$$
 and 
 
-$$\mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x | \theta) ] = -\text{F}$$
+$$\mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] = -\text{F}$$
 
 Where $$\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]$$ is the fisher information matrix. For the full derivation of these eqns checkout this blog post: 
 
@@ -193,25 +198,25 @@ And so using these equations, we get:
 
 $$\begin{align*}
 
-\nabla_{\theta'} D_{KL}[p(x | \theta) || p(x | \theta')] |_{\theta' = \theta} &= - \int p(x | \theta) \nabla_{\theta'} \log p(x | \theta')|_{\theta' = \theta} \text{d}x \\
-&= - \mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x | \theta)] \\
+\nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta')|_{\theta' = \theta} \text{d}x \\
+&= - \mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] \\
 &= 0
 \end{align*}$$
 
 ...
 
 $$\begin{align*}
-\nabla_{\theta'}^2 D_{KL}[p(x | \theta) || p(x | \theta')] |_{\theta' = \theta} &= - \int p(x | \theta) \nabla_{\theta'}^2 \log p(x | \theta') |_{\theta' = \theta} \text{d}x \\
-&= - \mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x | \theta) ] \\
+\nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') |_{\theta' = \theta} \text{d}x \\
+&= - \mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] \\
 &= \text{F} \\
 \end{align*}$$
 
 Then using the first-order approximation of $$L$$ with our second-order approximation of $$D_{KL}$$ we get:
 
 $$\begin{align*}
-\text{prox}_{L, \lambda}(\theta^{(k)}) =& \underset{\theta^{(k+1)}}{\argmin} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
-=& \underset{\theta^{(k+1)}}{\argmin} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} || p_{\theta^{(k+1)}}) ] \\ 
-\approx& \underset{\theta^{(k+1)}}{\argmin} [\nabla L(\theta^{(k)})^\intercal \theta^{(k+1)} + \lambda \dfrac{1}{2} (\theta^{(k+1)} - \theta^{(k)})^\intercal F (\theta^{(k+1)} - \theta^{(k)})] \\
+\text{prox}_{L, \lambda}(\theta^{(k)}) =& \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
+=& \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
+\approx& \underset{\theta^{(k+1)}}{\text{argmin}} [\nabla L(\theta^{(k)})^\intercal \theta^{(k+1)} + \lambda \dfrac{1}{2} (\theta^{(k+1)} - \theta^{(k)})^\intercal F (\theta^{(k+1)} - \theta^{(k)})] \\
 \end{align*}$$
 
 Computing the gradient and setting it to zero we get 
@@ -227,7 +232,7 @@ But how do we apply it to neural networks?
 
 # Natural Gradient Descent for Neural Nets 
 
-Usually our networks output distributions $$r( \cdot | x)$$ which we can use (e.g multi-classification problem). 
+Usually our networks output distributions $$r( \cdot \vert x)$$ which we can use (e.g multi-classification problem). 
 
 The idea is instead of making sure the weights don't change, we can make sure the output distribution doesn't change a lot. 
 
@@ -275,11 +280,11 @@ For the case of $$D_{KL}$$ we know that $$H_z = F_z$$ where $$F_z$$ is the fishe
 
 $$ \begin{align*}
 F_w &= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal F_z \text{J}_{zw}] \\
-&= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \mathbb{E}_{t \sim r(\cdot | x)} [\nabla_z \log r(t | x) \nabla_z \log r(t | x) ^ \intercal] \text{J}_{zw}] \\
-&= \mathbb{E_{x \sim p_{\text{data}}, {t \sim r(\cdot | x)}}} [\nabla_w \log r(t | x) \nabla_w \log r(t | x) ^ \intercal] \\
+&= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \mathbb{E}_{t \sim r(\cdot \vert x)} [\nabla_z \log r(t \vert x) \nabla_z \log r(t \vert x) ^ \intercal] \text{J}_{zw}] \\
+&= \mathbb{E_{x \sim p_{\text{data}}, {t \sim r(\cdot \vert x)}}} [\nabla_w \log r(t \vert x) \nabla_w \log r(t \vert x) ^ \intercal] \\
 \end{align*}$$
 
-Notice $${t \sim r(\cdot | x)}$$ samples $$t$$ from the model's distribution which is the **true fisher information matrix**. 
+Notice $${t \sim r(\cdot \vert x)}$$ samples $$t$$ from the model's distribution which is the **true fisher information matrix**. 
 
 Similar, but not the same, is the **empirical fisher information matrix** where $$t$$ is the data's target. 
 
@@ -292,7 +297,7 @@ $$
 Which again, if we compute the gradient and set it to zero, we get: 
 
 $$\begin{align*}
-w^{(k+1)} &= \underset{w^{(k+1)}}{\argmin} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k)} - w^{(k+1)})^\intercal \text{F}_w (w^{(k)} - w^{(k+1)})] \\
+w^{(k+1)} &= \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k)} - w^{(k+1)})^\intercal \text{F}_w (w^{(k)} - w^{(k+1)})] \\
 
 0 &= \nabla L(w^{(k)}) + \lambda (w^{(k)} - w^*)^\intercal \text{F}_w  \\
 
@@ -325,7 +330,9 @@ To get a feel for JAX, we first define a normal gradient step function
 
 <script src="https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js"></script>
 
-We can then define a natural gradient step using the empirical fisher matrix like so:
+We can then define a natural gradient step using the empirical fisher matrix below. 
+
+Recall our update rule is: $$ \theta_{t+1} = \theta_t - \eta F^{-1} \nabla L$$. So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using [conjugate gradient](https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf).
 
 <script src="https://gist.github.com/gebob19/2ecb5df93f8f2e7ebb58c0823084bfa6.js"></script>
 
@@ -343,34 +350,34 @@ Tada! Done! Last but not least we define some boilerplate training code and comp
 
 ## Results 
 
-*Note:* In the code, the gradients actually blow up. I think this is because our $$\lambda \rightarrow \infty$$ doesn't hold in practice and so $$\lambda^{-1} \text{F}_w^{-1}$$ results in very large numbers. To get around this I use gradient clipping. 
+*Note:* In the code, the gradients actually blow up. I think this is because our $$\lambda \rightarrow \infty$$ doesn't hold in practice and so $$\lambda^{-1} \text{F}_w^{-1} \rightarrow \text{F}_w^{-1}$$ results in very large gradient values. To get around this I use gradient clipping. 
 
 Here are the tensorboard results: 
 
 ### Test Accuracy
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/testacc.png" alt="test-acc" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/testacc.png" alt="test-acc" class="center"/>
 </div>
 
 ### Train Loss
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/loss.png" alt="train-loss" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/loss.png" alt="train-loss" class="center"/>
 </div>
 
 ### Linear 0
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/w0.png" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w0.png" class="center"/>
 </div>
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/b0.png" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b0.png" class="center"/>
 </div>
 
 ### Linear 1
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/w2.png" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w2.png" class="center"/>
 </div>
 <div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/assets/natural_grad/b2.png" class="center"/>
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b2.png" class="center"/>
 </div>
 
 Unfortantely in this scenario, I found Natural Gradient desecent approximations don't outperform SGD :(
