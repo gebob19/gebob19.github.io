@@ -8,8 +8,6 @@ image: tiger.jpg
 mathjax: true
 ---
 
-# Introduction 
-
 Generative Adversarial Networks (GANs) have shown great results in computer vision but how do they perform when applied to time-series data? Following this, do Convolutional Neural Networks (CNNs) or do Recursive Neural Networks (RNNs) achieve the best results? 
 
 In this post, we discuss GAN implementations which aim to generate time-series data including, C-RNN-GANs {%cite mogren2016c --file rnn_gen %}, RC-GANs {%cite esteban2017real --file rnn_gen %} and TimeGANs {%cite yoon2019time --file rnn_gen %}. Lastly, we implement RC-GAN and generate stock data. 

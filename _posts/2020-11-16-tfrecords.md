@@ -8,8 +8,6 @@ image: lion.jpg
 mathjax: true
 ---
 
-# Introduction 
-
 Compared to images, loading video data is expensive due to the I/O bottleneck and increased decoding time. This reduces efficiency leading to significantly longer training times. Reading online, there are generally two solutions for data loading videos:
 
 1. Decode the video and save its matrix as is  

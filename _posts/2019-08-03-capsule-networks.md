@@ -8,8 +8,6 @@ image: bear.jpg
 mathjax: true
 ---
 
-# Introduction 
-
 When applying Convolutional Neural Networks (CNNs) {% cite NIPS1989_293 --file capnets %} to a computer vision task, a change in viewpoint (change in orientation, position, shear, etc.) is likely to lead to drastically different network activations, hindering the model's ability to generalize. To solve this problem, current CNNs require a large number of parameters, datasets and computational power.  
 
 This lead to the introduction of Capsule Networks {% cite tae --file capnets %}. Capsule Networks aim to generalize to different viewpoints by taking advantage of the fact that the relationship between parts of an object is viewpoint invariant. It has been shown that these networks generalize better than standard CNNs, are more robust to adversarial attacks, achieve higher accuracy, all while requiring significantly fewer parameters. 
