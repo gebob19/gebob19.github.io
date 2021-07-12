@@ -4,9 +4,11 @@ description: "This Tutorial and blog post covers everything from intuition to th
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: bear.jpg
+image: mar.jpeg
 mathjax: true
 ---
+
+[Photo Link](https://unsplash.com/photos/ARVFsI-32Uk)
 
 When applying Convolutional Neural Networks (CNNs) {% cite NIPS1989_293 --file capnets %} to a computer vision task, a change in viewpoint (change in orientation, position, shear, etc.) is likely to lead to drastically different network activations, hindering the model's ability to generalize. To solve this problem, current CNNs require a large number of parameters, datasets and computational power.  
 

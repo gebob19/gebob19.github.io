@@ -4,9 +4,11 @@ description: "This blog post/tutorial dives deep into the theory and JAX code (s
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: lion.jpg
+image: nasa.jpeg
 mathjax: true
 ---
+
+[Photo Link](https://unsplash.com/photos/6-jTZysYY_U)
 
 Suppose we have some loss function $$L$$ that we want to minimize and 
 we have weights $$w$$. Throughout optimization we denote $$w^{(k)}$$ to the be the weights at the $$k$$-th iteration. 

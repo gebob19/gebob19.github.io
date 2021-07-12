@@ -4,9 +4,11 @@ description: "In this tutorial we cover convex properties and convergence proofs
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: switzerland.jpg
+image: italy.jpeg
 mathjax: true
 ---
+
+[Photo Link](https://unsplash.com/photos/TApAkERW5pQ)
 
 Get the presentation [here](\assets\convex\convex_pres.pdf)!
 

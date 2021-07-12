@@ -4,9 +4,11 @@ description: "This blog post/tutorial dives deep into the theory and PyTorch cod
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: mountains.jpg
+image: italy2.jpeg
 mathjax: true
 ---
+
+[Photo Link](https://unsplash.com/photos/cYrMQA7a3Wc)
 
 ![alt text](https://gebob19.github.io/assets/norm_flow/nf.png "Normalizing Flows (from R-NVP Paper)")
 

@@ -4,9 +4,10 @@ description: "In this tutorial we look at generative models which use recursive 
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: tiger.jpg
+image: fuji.jpeg
 mathjax: true
 ---
+[Photo Link](https://unsplash.com/photos/cCw6KQVJnyU)
 
 Generative Adversarial Networks (GANs) have shown great results in computer vision but how do they perform when applied to time-series data? Following this, do Convolutional Neural Networks (CNNs) or do Recursive Neural Networks (RNNs) achieve the best results? 
 
