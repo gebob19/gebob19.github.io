@@ -431,7 +431,7 @@ SGD, Empirical Fisher, Natural Fisher (1 Sample), and Natural Fisher (5 Sample).
 
 Pretty cool stuff!! :D 
 
-Unfortunately in this scenario, I found first-order Natural Gradient Descent didn't outperform SGD but naturally (pun intended) I'm sure there are cases where it does (different learning rates, clipping values, datasets, etc.). 
+Unfortunately in this scenario, Natural Gradient Descent didn't outperform SGD, but naturally (pun intended) I'm sure there are cases where it does (different learning rates, clipping values, datasets, etc.). 
 
 Did I do anything wrong? Anything to add? What did you like or dislike? 
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: こんにちは! Guten Tag! Good Afternoon!
+title: こんにちは! Guten Tag! Hello!
 permalink: /about
 ---
 
