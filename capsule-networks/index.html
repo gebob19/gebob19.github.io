@@ -49,14 +49,14 @@
 <link rel="canonical" href="https://gebob19.github.io/capsule-networks/" />
 <meta property="og:url" content="https://gebob19.github.io/capsule-networks/" />
 <meta property="og:site_name" content="Brennan Gebotys" />
-<meta property="og:image" content="https://gebob19.github.io/bear.jpg" />
+<meta property="og:image" content="https://gebob19.github.io/mar.jpeg" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2019-08-03T00:00:00-04:00" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta property="twitter:image" content="https://gebob19.github.io/bear.jpg" />
+<meta property="twitter:image" content="https://gebob19.github.io/mar.jpeg" />
 <meta property="twitter:title" content="Encapsulating Capsule Networks: Everything You Need To Know" />
 <script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"https://gebob19.github.io/capsule-networks/"},"url":"https://gebob19.github.io/capsule-networks/","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"https://gebob19.github.io/bear.jpg","description":"This Tutorial and blog post covers everything from intuition to the basics to a complicated distribution routing algorithm. As long as you don’t have a medical phobia of capsules, you’ll be able to swallow all the knowledge in this post.","headline":"Encapsulating Capsule Networks: Everything You Need To Know","dateModified":"2019-08-03T00:00:00-04:00","datePublished":"2019-08-03T00:00:00-04:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://gebob19.github.io/capsule-networks/"},"url":"https://gebob19.github.io/capsule-networks/","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"https://gebob19.github.io/mar.jpeg","description":"This Tutorial and blog post covers everything from intuition to the basics to a complicated distribution routing algorithm. As long as you don’t have a medical phobia of capsules, you’ll be able to swallow all the knowledge in this post.","headline":"Encapsulating Capsule Networks: Everything You Need To Know","dateModified":"2019-08-03T00:00:00-04:00","datePublished":"2019-08-03T00:00:00-04:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -105,10 +105,12 @@
   Encapsulating Capsule Networks: Everything You Need To Know
 </h1>
 
-  <img src="/assets/img/bear.jpg">
+  <img src="/assets/img/mar.jpeg">
 
 <article>
-  <p>When applying Convolutional Neural Networks (CNNs) <a class="citation" href="#NIPS1989_293">(LeCun et al., 1990)</a> to a computer vision task, a change in viewpoint (change in orientation, position, shear, etc.) is likely to lead to drastically different network activations, hindering the model’s ability to generalize. To solve this problem, current CNNs require a large number of parameters, datasets and computational power.</p>
+  <p><a href="https://unsplash.com/photos/ARVFsI-32Uk">Photo Link</a></p>
+
+<p>When applying Convolutional Neural Networks (CNNs) <a class="citation" href="#NIPS1989_293">(LeCun et al., 1990)</a> to a computer vision task, a change in viewpoint (change in orientation, position, shear, etc.) is likely to lead to drastically different network activations, hindering the model’s ability to generalize. To solve this problem, current CNNs require a large number of parameters, datasets and computational power.</p>
 
 <p>This lead to the introduction of Capsule Networks <a class="citation" href="#tae">(Hinton et al., 2011)</a>. Capsule Networks aim to generalize to different viewpoints by taking advantage of the fact that the relationship between parts of an object is viewpoint invariant. It has been shown that these networks generalize better than standard CNNs, are more robust to adversarial attacks, achieve higher accuracy, all while requiring significantly fewer parameters.</p>
 
@@ -792,6 +794,19 @@ p(z=k \mid x) &amp;= \dfrac{p(x \mid z=k) p(z=k)}{\sum_K p(x \mid z=k) p(z=k)} \
         
           <li>
             <h3>
+              <a href="/natural-gradient/">
+                The Natural Gradient and Approximations without the Tears
+                <!--<img src="https://gebob19.github.io/images/">-->
+                <!--<small>July 2, 2021</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+          <li>
+            <h3>
               <a href="/tfrecords/">
                 Video TFRecords: How to Efficiently Load Video Data
                 <!--<img src="https://gebob19.github.io/images/">-->
@@ -809,19 +824,6 @@ p(z=k \mid x) &amp;= \dfrac{p(x \mid z=k) p(z=k)}{\sum_K p(x \mid z=k) p(z=k)} \
                 Generative Models: Recursive Edition
                 <!--<img src="https://gebob19.github.io/images/">-->
                 <!--<small>July 23, 2020</small>-->
-              </a>
-            </h3>
-          </li>
-          
-        
-      
-        
-          <li>
-            <h3>
-              <a href="/convex-optimization/">
-                Convex Optimization: Algorithms and their Rate of Convergence
-                <!--<img src="https://gebob19.github.io/images/">-->
-                <!--<small>April 19, 2020</small>-->
               </a>
             </h3>
           </li>

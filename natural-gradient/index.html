@@ -1,0 +1,632 @@
+<!doctype html>
+<html>
+  <head>
+  <title>
+    
+      The Natural Gradient and Approximations without the Tears | Brennan Gebotys
+    
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+  <link type="application/atom+xml" rel="alternate" href="https://gebob19.github.io/feed.xml" title="Brennan Gebotys" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="Brennan Gebotys | Machine Learning, Statistics, and All Things Cool"/>
+  //-->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+      });
+  </script>
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-144191674-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>The Natural Gradient and Approximations without the Tears | Brennan Gebotys</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="The Natural Gradient and Approximations without the Tears" />
+<meta name="author" content="Brennan Gebotys" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient" />
+<meta property="og:description" content="This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient" />
+<link rel="canonical" href="https://gebob19.github.io/natural-gradient/" />
+<meta property="og:url" content="https://gebob19.github.io/natural-gradient/" />
+<meta property="og:site_name" content="Brennan Gebotys" />
+<meta property="og:image" content="https://gebob19.github.io/nasa.jpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-02T00:00:00-04:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://gebob19.github.io/nasa.jpeg" />
+<meta property="twitter:title" content="The Natural Gradient and Approximations without the Tears" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://gebob19.github.io/natural-gradient/"},"url":"https://gebob19.github.io/natural-gradient/","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"https://gebob19.github.io/nasa.jpeg","description":"This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient","headline":"The Natural Gradient and Approximations without the Tears","dateModified":"2021-07-02T00:00:00-04:00","datePublished":"2021-07-02T00:00:00-04:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+  <body>
+    <div class="container">
+      <header class="header">
+  <h3 class="header-title">
+    <a href="/">Brennan Gebotys</a>
+    <small class="header-subtitle">Machine Learning, Statistics, and All Things Cool</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/">Home</a>
+    
+      <a href="/writing.html">Compact Blog</a>
+    
+      <a href="/about.html">About</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+      <div class="content-container">
+        <h1>
+  The Natural Gradient and Approximations without the Tears
+</h1>
+
+  <img src="/assets/img/nasa.jpeg">
+
+<article>
+  <p><a href="https://unsplash.com/photos/6-jTZysYY_U">Photo Link</a></p>
+
+<p>To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:</p>
+
+\[w^* = \underset{w}{\text{argmin}} L(w)\]
+
+<p>Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called <strong>proximal policy optimization</strong>.</p>
+
+<p>To do this, with \(w^{(k)}\) denoting the weights at the \(k\)-th iteration, we can add another term to our loss function \(\rho(w^{(k)}, w^{(k+1)})\) which minimizes how much the weights change between iterations like so:</p>
+
+\[w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ]\]
+
+<p>where \(\lambda\) controls how much we want the weights to change between iterations (larger \(\lambda\) = less change).</p>
+
+<hr />
+
+<p>Most of this post is created in reference to Roger Grosse’s fantastic ‘Neural Net Training Dynamics’ course. The course can be found <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">here</a> and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of thier own.</p>
+
+<hr />
+
+<h1 id="euclidean-space">Euclidean Space</h1>
+
+<p>For example, in Euclidean space we could define \(\rho\) to be the 2-norm between our weights:</p>
+
+\[\rho(w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} \| w^{(k+1)} - w^{(k)}\|^2\]
+
+<p>And so we would get:</p>
+
+\[w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \dfrac{1}{2} \|w^{(k+1)} - w^{(k)}\|^2 ]\]
+
+<p>Lets try to solve for the optimum (i.e \(w^{(k+1)} = w^*\)) by computing the grad and setting to 0. If we do so, we get:</p>
+
+\[\begin{align*}
+0 &amp;= \nabla L(w^*) + \lambda (w^* - w^{(k)}) \\
+- \lambda^{-1} \nabla L(w^*) &amp;= (w^* - w^{(k)}) \\
+w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^*) \\
+\end{align*}\]
+
+<p>Note that \(\nabla L\) is defined at \(w^*\) so we can’t directly use the result. But the equation looks very similar to SGD. Naturally, you’re probably wondering:</p>
+
+<blockquote>
+  <p>“Brennan, why did you introduce a result which we can’t even use? This is blasphemy.”</p>
+</blockquote>
+
+<p>Well fear not my fellow gradient friends, to solve this there are a few approximations we could use…</p>
+
+<h1 id="first-order-approximation-of-l-around-wk">First Order Approximation of \(L\) around \(w^{(k)}\)</h1>
+
+<p><strong>Note</strong>: For the following sections it would be good to be comfortable with Taylor series approximations. If you aren’t, I would recommend grabbing a cup of tea and enjoy <a href="https://www.youtube.com/watch?v=3d6DsjIBzJ4">3b1b’s video on the topic</a>.</p>
+
+<hr />
+
+<p>One possible way to use the result and constrain our weights is to approximate \(L(w^{(k+1)})\) with a first-order Taylor series around \(w^{(k)}\):</p>
+
+\[L(w^{(k+1)}) = L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)})\]
+
+<p>Substituting this into our loss we get:</p>
+
+\[\begin{align*}
+
+\text{prox}_{L, \lambda}(w^{(k)}) =&amp; \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+\approx&amp; \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)}) + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+=&amp; \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \rho(w^{(k+1)}, w^{(k)}) ] \\
+
+\end{align*}\]
+
+<p>Note we go from the second to the third line since \(\text{argmin}_{w^{(k+1)}}\) ignores any terms without \(w^{(k+1)}\).</p>
+
+<p>Then similar to the previous section lets computing the gradient with respect to \(w^{(k+1)}\) and set it to zero:</p>
+
+\[\begin{align*}
+0 &amp;= \nabla L(w^{(k)}) + \lambda (w^* - w^{(k)}) \\
+w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) \\
+\end{align*}\]
+
+<p>We see that this is gradient descent. Interesting! Notice how if we want our weights to be very close together across iterations then we would set \(\lambda\) to be a large value so \(\lambda^{-1}\) would be a small value and so we would be taking very small gradient steps to reduce large changes in our weights across iterations.</p>
+
+<p>This means that in Euclidean space, proximal policy optimization approximated with a first-order Taylor is the same as regular gradient descent.</p>
+
+<h1 id="use-a-second-order-approximation-of-rho">Use a Second-Order Approximation of \(\rho\)</h1>
+
+<p>Another way we could solve the equation is to use the first-order approximation of \(L\) with a second-order approximation of \(\rho\). Furthermore, we would let \(\lambda \rightarrow \infty\) (we want our steps to be as close as possible).</p>
+
+<p><em>Note:</em> Though we don’t need to do this since we solved it directly in the last section, the ideas in this simple example will complement the rest of the post nicely.</p>
+
+<p>To compute our second order approximation of \(\rho\) we need to compute \(\nabla \rho\) and \(\nabla^2 \rho\).</p>
+
+<p>To do so, we take advantage of the fact \(\lambda \rightarrow \infty\). This implies that in Euclidean space, \(w^{(k+1)} \approx w^{(k)}\). And so we get:</p>
+
+\[\rho (w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} \|w^{(k)} - w^{(k+1)} \|^2 \approx \dfrac{1}{2} \|w^{(k)} - w^{(k)} \|^2 = 0\]
+
+<p>and</p>
+
+\[\nabla \rho (w^{(k+1)}, w^{(k)}) = (w^{(k)} - w^{(k+1)}) \approx (w^{(k)} - w^{(k)}) = 0\]
+
+<p>Since both \(\rho\) and \(\nabla \rho\) are both \(0\) when we approx \(\rho\) with a second-order Taylor series, we are left with only our second order approximation (\(\nabla^2 \rho\)):</p>
+
+\[\begin{align*}
+\rho (w^{(k+1)}, w^{(k)}) &amp;\approx \rho(w^{(k+1)}, w^{(k)}) + \nabla \rho(w^{(k+1)}, w^{(k)})^\intercal (w^{(k+1)} - w^{(k)}) + \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)}) \\
+&amp;= \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})
+\end{align*}\]
+
+<p>where \(G = \nabla^2 \rho (w^{(k+1)}, w^{(k)}) \vert_{w^{(k+1)} = w^{(k)}}\).</p>
+
+<p>Using the second-order approx of \(\rho\) with the first-order approx of \(L\) which we derived last section we get the following:</p>
+
+\[\begin{align*}
+\text{prox}_{L, \lambda}(w^{(k)}) =&amp; \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ] \\
+\approx&amp; \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})]
+\end{align*}\]
+
+<p>Solving for the optimal \(w^*\) we get:</p>
+
+\[\begin{align*}
+w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) 
+\end{align*}\]
+
+<p>In Euclidean space \(\text{G} = \nabla^2 \rho (w^{(k+1)}, w^{(k)}) = \text{I}\), so again we get gradient descent:</p>
+
+\[\begin{align*}
+w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
+&amp;= w^{(k)} - \lambda^{-1} \text{I}^{-1} \nabla L(w^{(k)}) \\
+&amp;= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) 
+\end{align*}\]
+
+<p>Though this doesn’t conclude anything new compared to the previous section, this shows how we can use a second-order approximation for \(\rho\) to derive an update rule.</p>
+
+<h1 id="kl-divergence">KL Divergence</h1>
+
+<p>Now Euclidean space is overall fantastic, but sometimes Euclidean space isn’t always that great (example taken from <a href="https://wiseodd.github.io/about/">here</a>):</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist.png" alt="test-acc" class="center" />
+</div>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist2.png" alt="test-acc" class="center" />
+</div>
+
+<p>In the two images, we see two Gaussians (coloured orange and blue).</p>
+
+<p>If we parameterize the Gaussians by their parameters (i.e their mean value \(\mu\)) then both examples have the same distance between them (shown in red). This is called <strong>parameter space</strong>. However, we see that the distributions in the first image are much closer than the ones in the second.</p>
+
+<p>To solve this problem, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in <strong>distribution space</strong>. Doing so would result in a smaller metric for the first image than the second image, as we would want.</p>
+
+<p>More formally, KL-Divergence (KL-D) measures the distance between two distributions \(p(x \vert \theta')\) and \(p(x \vert \theta)\) which are parameterized by \(\theta'\) and \(\theta\) and is defined as:</p>
+
+\[\begin{align*}
+D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log \dfrac{p(x \vert \theta)}{p(x \vert \theta')}] \\
+&amp;= \sum_x p(x|\theta) [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+&amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+\end{align*}\]
+
+<p><em>Note:</em> KL-D cannot be applied to neural networks with weights \(w\) because it measures the distance between <em>distributions</em>, which \(w\) is not. To show this difference we will let \(\theta^{(k)}\) parameterize some distribution \(p(x \vert \theta^{(k)})\) at the \(k\)-th step of optimization.</p>
+
+<p><em>Teaser:</em> We’ll see how to apply this to neural nets later ;)</p>
+
+<p>Lets assume we want \(\theta^{(k)}\) and \(\theta^{(k+1)}\) to be close across steps. Then we can let \(\rho(\theta^{(k)}, \theta^{(k+1)}) = D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) where \(p_{\theta^{(k)}} = p(x \vert \theta^{(k)})\). And so, we will want to solve for:</p>
+
+\[\begin{align*}
+\theta^* = \text{prox}_{L, \lambda}(\theta^{(k)}) =&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
+=&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
+\end{align*}\]
+
+<p>Similar to last section, lets fisrt approximate \(D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) with a second-order taylor expansion. Recall from the previous section to approximate \(\rho\) with a second-order taylor series we need to define \(\rho\vert_{\theta'=\theta}\), \(\nabla \rho\vert_{\theta'=\theta}\) and \(\nabla^2 \rho\vert_{\theta'=\theta}\).</p>
+
+<p>First, lets derive \(\rho\), \(\nabla \rho\), and \(\nabla^2 \rho\) for \(D_{KL}\)</p>
+
+\[\begin{align*}
+\rho = D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+&amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+\end{align*}\]
+
+<p>…</p>
+
+\[\begin{align*}
+
+\nabla \rho = \nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+&amp;= - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+&amp;= - \nabla_{\theta'} \int p(x \vert \theta) \log p(x \vert \theta') \text{d}x \\
+&amp;= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta') \text{d}x
+
+\end{align*}\]
+
+<p>…</p>
+
+\[\begin{align*}
+\nabla^2 \rho = \nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') \text{d}x \\
+\end{align*}\]
+
+<p>To evaluate \(\rho\vert_{\theta'=\theta}\), \(\nabla \rho\vert_{\theta'=\theta}\) and \(\nabla^2 \rho \vert_{\theta'=\theta}\) we are going to need the two following equations:</p>
+
+\[\mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] = 0\]
+
+<p>and</p>
+
+\[\mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] = -\text{F}\]
+
+<p>Where \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\) is the fisher information matrix. For the full derivation of these eqns checkout <a href="https://wiseodd.github.io/techblog/2018/03/11/fisher-information/">this blog post</a>.</p>
+
+<p>And so using these equations, we get:</p>
+
+\[\begin{align*}
+
+\nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &amp;= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta')|_{\theta' = \theta} \text{d}x \\
+&amp;= - \mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] \\
+&amp;= 0
+\end{align*}\]
+
+\[\begin{align*}
+\nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &amp;= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') |_{\theta' = \theta} \text{d}x \\
+&amp;= - \mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] \\
+&amp;= \text{F} \\
+\end{align*}\]
+
+<p>Then using the first-order approximation of \(L\) with our second-order approximation of \(D_{KL}\) we get:</p>
+
+\[\begin{align*}
+\text{prox}_{L, \lambda}(\theta^{(k)}) =&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
+\approx&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [\nabla L(\theta^{(k)})^\intercal \theta^{(k+1)} + \lambda \dfrac{1}{2} (\theta^{(k+1)} - \theta^{(k)})^\intercal F (\theta^{(k+1)} - \theta^{(k)})] \\
+\end{align*}\]
+
+<p>Computing the gradient and setting it to zero we get</p>
+
+\[\begin{align*}
+\theta^* &amp;= \theta^{(k)} - \lambda^{-1}\text{F}^{-1}\nabla L(\theta^k) \\
+&amp;= \theta^{(k)} - \lambda^{-1}\tilde{\nabla} L(\theta^k) \\
+\end{align*}\]
+
+<p>Where \(\tilde{\nabla} L(\theta^{(k)})\) is called the <strong>natural gradient</strong>. And this update rule is called <strong>natural gradient descent</strong>. Fantastic!</p>
+
+<p>Now you’re probably thinking:</p>
+
+<blockquote>
+  <p>“Indeed, this is truly fantastic, we now know how to constrain distributions across iterations using \(D_{KL}\) but how do we apply it to neural networks with weights \(w\)??”</p>
+</blockquote>
+
+<p>Patience young padawan, we shall discover this in the following section</p>
+
+<h1 id="natural-gradient-descent-for-neural-nets">Natural Gradient Descent for Neural Nets</h1>
+
+<p>Though our weights \(w\) aren’t a distribution, usually, our model outputs a distribution \(r( \cdot \vert x)\). For example, in classification problems like MNIST our model’s outputs a probability distribution over the digits 1 - 10.</p>
+
+<p>The idea is that even though we can’t constrain our weights across iterations with KL-D, we can use KL-D to constrain the difference between our output distributions across iterations which is likely to do something similar.</p>
+
+<p>More formally, we can define our output distribution as \(z = f(w, x)\) and set \(\rho = D_{KL}\). Then we can define \(\rho_{\text{pull}}\) as the following:</p>
+
+\[\rho_{\text{pull}}(w, w') = \mathbb{E}_{x}[f_x * \rho(w, w')] = \mathbb{E}[\rho(f(w, x), f(w', x))]\]
+
+<p>Where the \(f_x*\rho\) operator is called a pullback operation:</p>
+
+\[f*g(x_1, ..., x_k) = g(f(x_1), f(x_2), ..., f(x_k))\]
+
+<p>Now similar to the previous sections, lets approximate \(\rho_{\text{pull}}\) with a second-order Taylor expansion. Again, we need to find \(\rho_{\text{pull}}(w, w')\vert_{w = w'}\), \(\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}\), and \(\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}\):</p>
+
+\[\begin{align*}
+\rho_{\text{pull}}(w, w')\vert_{w = w'} &amp;= \rho(f(w', x), f(w', x)) \\
+&amp;= 0 \\
+\end{align*}\]
+
+\[\begin{align*}
+\nabla_w \rho_{\text{pull}}(w, w')\vert_{w = w'} &amp;= \nabla_w\rho(f(w, x), f(w', x)) \\
+&amp;= \text{J}_{zx}^\intercal \underbrace{\nabla_z\rho(z, z')|_{z=z'}}_{=0} \\ 
+&amp;= 0 \\
+\end{align*}\]
+
+<p>The last line occurs bc of the chain rule and since we know for \(\nabla \rho = \nabla D_{KL} = 0\). Notice how pullback functions (\(\rho_{\text{pull}}\)) make the gradients simple to compute :).</p>
+
+<p>Using this decomposition it can be shown that \(\nabla^2 \rho_{\text{pull}}\) (in general any hessian/second derivative matrix) can be decomposed into the following (check out <a href="https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/">this</a> for a full derivation):</p>
+
+\[\begin{align*}
+\nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
+&amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw}
+\end{align*}\]
+
+<p>Where \(\text{J}_{zw}\) is the Jacobian matrix for \(\dfrac{dz}{dw}\) and \(H_z\) is the hessian matrix for \(z\). Again, the second term disappears since we know \(\nabla \rho = \nabla D_{KL} = 0\).</p>
+
+<p>For the case of \(D_{KL}\) we know that \(H_z = F_z\) where \(F_z\) is the fisher information matrix. And so using the definition of the fisher matrix (i.e \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\)) we can derive our second-order approximation:</p>
+
+\[\begin{align*}
+\nabla_w^2 \rho_{\text{pull}}(w, w') = \text{F}_w &amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \text{F}_z \text{J}_{zw}] \\
+&amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \mathbb{E}_{t \sim r(\cdot \vert x)} [\nabla_z \log r(t \vert x) \nabla_z \log r(t \vert x) ^ \intercal] \text{J}_{zw}] \\
+&amp;= \mathbb{E_{x \sim p_{\text{data}}, {t \sim r(\cdot \vert x)}}} [\nabla_w \log r(t \vert x) \nabla_w \log r(t \vert x) ^ \intercal] \\
+\end{align*}\]
+
+<p>Notice \({t \sim r(\cdot \vert x)}\) samples \(t\) from the <em>model’s distribution</em> which is the <strong>true fisher information matrix</strong>.</p>
+
+<p>Similar, but not the same, is the <strong>empirical fisher information matrix</strong> where \(t\) is taken to be the true target.</p>
+
+<p>In total, using our approximation we get the following second-order approximation:</p>
+
+\[\rho_{\text{pull}}(w, w') \approx \dfrac{1}{2} (w - w')^\intercal \text{F}_w (w - w')\]
+
+<p>Which again, if we compute the gradient and set it to zero, we get:</p>
+
+\[\begin{align*}
+w^{(k+1)} &amp;= \underset{w^{(k+1)}}{\text{argmin}} [\nabla L(w^{(k)})^\intercal w^{(k+1)} + \lambda \dfrac{1}{2} (w^{(k)} - w^{(k+1)})^\intercal \text{F}_w (w^{(k)} - w^{(k+1)})] \\
+
+0 &amp;= \nabla L(w^{(k)}) + \lambda (w^{(k)} - w^*)^\intercal \text{F}_w  \\
+
+- \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)}) &amp;=  (w^{(k)} - w^*)   \\
+w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
+
+\end{align*}\]
+
+<p>We now see that this results in the <strong>natural gradient method</strong> :o</p>
+
+<h1 id="computing-the-natural-gradient-in-jax">Computing the Natural Gradient in JAX</h1>
+
+<p>The theory is amazing but it doesn’t mean much if we can’t use it. So, to finish it off we’re gonna code it!</p>
+
+<p>To do so, we’ll write the code in <strong>JAX</strong> (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset (not the ideal scenario for natural gradient descent to shine but its good to show how everything works).</p>
+
+<p>If you’re new to JAX there’s a lot of great resources out there to learn from! What do I like about it you ask? Coming from a Computer Science background, I love the functional programming aspect of it which lets you write really clean code :D</p>
+
+<h2 id="code">Code</h2>
+
+<p>First, we define a small MLP model</p>
+
+<script src="https://gist.github.com/gebob19/d0b4e9ef147545b3f5762461c4b2a6fe.js"></script>
+
+<p>Then we define a few loss functions</p>
+
+<script src="https://gist.github.com/gebob19/e288e7a0646d53ee732b6ab9c251b705.js"></script>
+
+<p>Next, we make the losses work for batch input using <code class="language-plaintext highlighter-rouge">vmap</code></p>
+
+<script src="https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js"></script>
+
+<p>Single example -&gt; batch data with a single line! So clean! :D</p>
+
+<p>To get a general feel for JAX, we first define a normal gradient step function (we use <code class="language-plaintext highlighter-rouge">@jit</code> to compile the function which makes it run fast)</p>
+
+<script src="https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js"></script>
+
+<p>We can then define a natural gradient step using the <strong>empirical fisher matrix</strong>:</p>
+
+<p><strong>Recall</strong>: Our update rule is: \(\theta_{t+1} = \theta_t - \eta F^{-1} \nabla L\). So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the <a href="https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf">conjugate gradient method</a>.</p>
+
+<p><strong>Aside</strong>: There’s a lot of really cool resources to help understand the conjugate gradient method <a href="https://twitter.com/brennangebotys/status/1410231825868509185?s=20">like this one</a>.</p>
+
+<script src="https://gist.github.com/gebob19/2ecb5df93f8f2e7ebb58c0823084bfa6.js"></script>
+
+<p><em>Note:</em> Although we should be using the gradients from <code class="language-plaintext highlighter-rouge">mean_log_likelihood</code>, we can use the <code class="language-plaintext highlighter-rouge">grads</code> from the <code class="language-plaintext highlighter-rouge">mean_cross_entropy</code> to shave off an extra forward and backward pass. <em>Exercise:</em> Why does this work? (Hint: does <code class="language-plaintext highlighter-rouge">grad2fisher</code> change if we use <code class="language-plaintext highlighter-rouge">nll</code> vs <code class="language-plaintext highlighter-rouge">ll</code>?)</p>
+
+<p>Finally, we can define the natural gradient step by sampling from the model’s predictions:</p>
+
+<p><em>Note:</em> To evaluate \(\mathbb{E_{t \sim r(\cdot \vert x)}}[...]\) we use Monte Carlo estimation and sample multiple times from our model distribution which we do using <code class="language-plaintext highlighter-rouge">n_samples</code>.</p>
+
+<script src="https://gist.github.com/gebob19/ba7d73eb16c8331cc75a7b5dd49e7ab9.js"></script>
+
+<p>We can also checkout the difference in speed (run on my laptop’s CPUs) with a batch size of 2:</p>
+
+<script src="https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js"></script>
+
+<p><code class="language-plaintext highlighter-rouge">995 µs ± 172 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # SGD</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">6.96 ms ± 648 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # Emp NGD (6x slower SGD)</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">1.33 s ± 21.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 1 sample (1000x slower SGD)</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">3.68 s ± 476 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 5 sample (3000x slower SGD)</code></p>
+
+<p>Last but not least we define some boilerplate training code and compare the runs:</p>
+
+<script src="https://gist.github.com/gebob19/7200ee0bfc99274b817896cbade5dd8c.js"></script>
+
+<p>Tada! Done! The full code can be found <a href="">HERE</a>.</p>
+
+<h2 id="results">Results</h2>
+
+<p><strong>Note:</strong> In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients actually blow up (to values up to <code class="language-plaintext highlighter-rouge">1e+20</code>) to values too big to view on tensorboard (still trainable but results in error lol). I’m not exactly sure why this is yet. But, to get around this, I used gradient clipping (clipped to have values in [-10, 10]).</p>
+
+<hr />
+
+<p>Here are the tensorboard results:</p>
+
+<h3 id="test-accuracy">Test Accuracy</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/testacc.png" alt="test-acc" class="center" />
+</div>
+
+<h3 id="train-loss">Train Loss</h3>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/loss.png" alt="train-loss" class="center" />
+</div>
+
+<h3 id="weights--gradients">Weights &amp; Gradients</h3>
+
+<p>The diagrams in the following order:</p>
+
+<p>SGD, Empirical Fisher, Natural Fisher (1 Sample), and Natural Fisher (5 Sample).</p>
+
+<p><em>Note:</em> Each diagram uses its own scale.</p>
+
+<h4 id="linear-0">Linear 0</h4>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w0.png" class="center" />
+</div>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b0.png" class="center" />
+</div>
+
+<h4 id="linear-1">Linear 1</h4>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w2.png" class="center" />
+</div>
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b2.png" class="center" />
+</div>
+
+<p>Pretty cool stuff!! :D</p>
+
+<p>Unfortunately in this scenario, I found first-order Natural Gradient Descent didn’t outperform SGD but naturally (pun intended) I’m sure there are cases where it does (different learning rates, clipping values, datasets, etc.).</p>
+
+<p>Did I do anything wrong? Anything to add? What did you like or dislike?</p>
+
+<p>Let me know – tweet, email, or dm me! :D</p>
+
+
+</article>
+
+  <span class="post-date">
+  Written on
+  
+  July
+  2nd
+    ,
+  2021
+  by
+  
+    Brennan Gebotys
+  
+</span>
+
+
+
+  <div class="post-date">Feel free to share!</div>
+<div class="sharing-icons">
+  <a href="https://twitter.com/intent/tweet?text=The Natural Gradient and Approximations without the Tears&amp;url=/natural-gradient/" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=/natural-gradient/&amp;title=The Natural Gradient and Approximations without the Tears" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+</div>
+
+
+
+  <div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/tfrecords/">
+                Video TFRecords: How to Efficiently Load Video Data
+                <!--<img src="https://gebob19.github.io/images/">-->
+                <!--<small>November 16, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/recursive-generative-models/">
+                Generative Models: Recursive Edition
+                <!--<img src="https://gebob19.github.io/images/">-->
+                <!--<small>July 23, 2020</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+      </div>
+      <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/gebob19" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/brennangebotys" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="footer-description"><a href="/">Brennan Gebotys | Machine Learning, Statistics, and All Things Cool by Brennan Gebotys</a></div>
+</footer>
+
+    </div>
+  </body>
+</html>

@@ -1,5 +1,7 @@
 /* Base */
-body { font-family: "PT Serif", Georgia, "Times New Roman", serif; font-size: 18px; color: #505050; line-height: 1.75rem; }
+.gist .blob-code-inner { font-size: 15px !important; }
+
+body { font-family: "PT Serif", Georgia, "Times New Roman", serif; font-size: 20px; color: #505050; line-height: 1.75rem; }
 
 @media (max-width: 30em) { body { font-size: 14px; line-height: 1.5rem; } body h1 { font-size: 1.5rem; } }
 
@@ -29,7 +31,7 @@ th, td { padding: 15px; text-align: left; }
 /* Code */
 code, pre { font-family: "Source Code Pro", monospace; }
 
-code { padding: .25em .5em; font-size: .8rem; background-color: #f5f5f5; border-radius: 3px; }
+code { padding: .25em .5em; font-size: 1rem; background-color: #f5f5f5; border-radius: 3px; }
 
 pre { display: block; margin-top: 0; margin-bottom: 1rem; padding: 1rem; font-size: .8rem; line-height: 1.4; white-space: pre; white-space: pre-wrap; word-break: break-all; word-wrap: break-word; background-color: #f5f5f5; }
 
