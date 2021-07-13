@@ -1,5 +1,5 @@
 ---
-title:  "The Natural Gradient and Approximations without the Tears"
+title:  "The Natural Gradient without the Tears"
 description: "This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient"
 layout: post
 categories: journal
@@ -385,7 +385,7 @@ Last but not least we define some boilerplate training code and compare the runs
 <script src="https://gist.github.com/gebob19/7200ee0bfc99274b817896cbade5dd8c.js"></script>
 
 
-Tada! Done! The full code can be found [HERE]().
+Tada! Done! The full code can be found [HERE](https://github.com/gebob19/naturalgradient).
 
 ## Results 
 
