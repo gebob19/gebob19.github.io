@@ -1,9 +1,9 @@
 ---
 layout: page
-title: こんにちは!
+title: こんにちは! Guten Tag! Good Afternoon!
 permalink: /about
 ---
 
 I enjoy writing about things that I find cool :) 
 
-Currently completing my masters in machine learning at the University of Waterloo.
+Currently completing my MASc in Machine Learning at the University of Waterloo.
