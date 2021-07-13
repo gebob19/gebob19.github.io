@@ -4,7 +4,7 @@ description: "This blog post/tutorial dives deep into the theory and PyTorch cod
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: italy2.jpeg
+image: wave.jpeg
 mathjax: true
 ---
 

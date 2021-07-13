@@ -1,6 +1,6 @@
 ---
-title:  "First-Order Approximations of the Natural Gradient without the Tears"
-description: "This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code first order approximations of the natural gradient"
+title:  "The Natural Gradient and Approximations without the Tears"
+description: "This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient"
 layout: post
 categories: journal
 tags: [documentation,sample]
@@ -10,17 +10,23 @@ mathjax: true
 
 [Photo Link](https://unsplash.com/photos/6-jTZysYY_U)
 
-To set the scene, suppose we have some loss function $$L$$ that we want to minimize with a model which has weights $$w$$. Then our objective is to find $$w^*$$ where: 
+To set the scene, suppose we have a model with weights $$w$$ and some loss function $$L(w)$$ that we want to minimize. Then our objective is to find $$w^*$$ where: 
 
 $$w^* = \underset{w}{\text{argmin}} L(w)$$
 
-Suppose good ol' SGD optimization is noisy or has a high variance for whatever reason (e.g policy gradient methods in RL). Then ideally we would want to constrain how much our weights change between optimization iterations. This is called **proximal policy optimiztion**. 
+Suppose good ol' SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called **proximal policy optimization**. 
 
 To do this, with $$w^{(k)}$$ denoting the weights at the $$k$$-th iteration, we can add another term to our loss function $$\rho(w^{(k)}, w^{(k+1)})$$ which minimizes how much the weights change between iterations like so: 
 
 $$w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ]$$
 
 where $$\lambda$$ controls how much we want the weights to change between iterations (larger $$\lambda$$ = less change).
+
+***
+
+Most of this post is created in reference to Roger Grosse's fantastic 'Neural Net Training Dynamics' course. The course can be found [here](https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/) and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of thier own.
+
+***
 
 # Euclidean Space
 
@@ -42,7 +48,7 @@ w^* &= w^{(k)} - \lambda^{-1} \nabla L(w^*) \\
 \end{align*}
 $$
 
-Note that $$\nabla L$$ is defined at $$w^*$$ so we can't directly use the result. But the equation looks very similar to SGD. Naturally, you're probably wondering, 
+Note that $$\nabla L$$ is defined at $$w^*$$ so we can't directly use the result. But the equation looks very similar to SGD. Naturally, you're probably wondering: 
 
 > "Brennan, why did you introduce a result which we can't even use? This is blasphemy."
 
@@ -50,17 +56,17 @@ Well fear not my fellow gradient friends, to solve this there are a few approxim
 
 # First Order Approximation of $$L$$ around $$w^{(k)}$$
 
-**Note**: For the following sections it would be good to be comfortable with taylor-series approximations. If you aren't, I would recommend grabbing a cup of tea and enjoy [3b1b's video on the topic](https://www.youtube.com/watch?v=3d6DsjIBzJ4).
+**Note**: For the following sections it would be good to be comfortable with Taylor series approximations. If you aren't, I would recommend grabbing a cup of tea and enjoy [3b1b's video on the topic](https://www.youtube.com/watch?v=3d6DsjIBzJ4).
 
 ***
 
-One possible way to use the result is to approximate $$L(w^{(k+1)})$$ with a first order taylor series around $$w^{(k)}$$:
+One possible way to use the result and constrain our weights is to approximate $$L(w^{(k+1)})$$ with a first-order Taylor series around $$w^{(k)}$$:
 
 $$
 L(w^{(k+1)}) = L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)})
 $$
 
-Substituting this in to our loss we get:
+Substituting this into our loss we get:
 
 $$\begin{align*}
 
@@ -72,7 +78,7 @@ $$\begin{align*}
 
 Note we go from the second to the third line since $$\text{argmin}_{w^{(k+1)}}$$ ignores any terms without $$w^{(k+1)}$$. 
 
-Then similar to the previous section, lets computing the gradient wtr to $$w^{(k+1)}$$ and set it to zero:
+Then similar to the previous section lets computing the gradient with respect to $$w^{(k+1)}$$ and set it to zero:
 
 $$ 
 \begin{align*}
@@ -81,13 +87,13 @@ w^* &= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) \\
 \end{align*}
 $$
 
-We see that this is gradient descent. Interesting! Notice how if we want our weights to be very close together across iterations then we would set $$\lambda$$ to be a large value so $$\lambda^{-1}$$ would be a small value and so we would be taking very small gradient steps. 
+We see that this is gradient descent. Interesting! Notice how if we want our weights to be very close together across iterations then we would set $$\lambda$$ to be a large value so $$\lambda^{-1}$$ would be a small value and so we would be taking very small gradient steps to reduce large changes in our weights across iterations. 
 
-This means that in Euclidean space, proximal policy optimiztion approximated with a first-order taylor is the same as regular gradient descent. 
+This means that in Euclidean space, proximal policy optimization approximated with a first-order Taylor is the same as regular gradient descent. 
 
-# Use a Second Order Approximation of $$\rho$$
+# Use a Second-Order Approximation of $$\rho$$
 
-Another way we could solve the equation is to use the first order approximation of $$L$$ with a second order approximation of $$\rho$$. Furthermore, we would let $$\lambda \rightarrow \infty$$ (we want our steps to be as close as possible). 
+Another way we could solve the equation is to use the first-order approximation of $$L$$ with a second-order approximation of $$\rho$$. Furthermore, we would let $$\lambda \rightarrow \infty$$ (we want our steps to be as close as possible). 
 
 *Note:* Though we don't need to do this since we solved it directly in the last section, the ideas in this simple example will complement the rest of the post nicely. 
 
@@ -101,7 +107,7 @@ and
 
 $$\nabla \rho (w^{(k+1)}, w^{(k)}) = (w^{(k)} - w^{(k+1)}) \approx (w^{(k)} - w^{(k)}) = 0$$
 
-Since both $$\rho$$ and $$\nabla \rho$$ are both $$0$$ when we approx $$\rho$$ with a second-order taylor series, we are left with only our second order approximation ($$\nabla^2 \rho$$): 
+Since both $$\rho$$ and $$\nabla \rho$$ are both $$0$$ when we approx $$\rho$$ with a second-order Taylor series, we are left with only our second order approximation ($$\nabla^2 \rho$$): 
 
 $$\begin{align*}
 \rho (w^{(k+1)}, w^{(k)}) &\approx \rho(w^{(k+1)}, w^{(k)}) + \nabla \rho(w^{(k+1)}, w^{(k)})^\intercal (w^{(k+1)} - w^{(k)}) + \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)}) \\
@@ -145,11 +151,11 @@ Now Euclidean space is overall fantastic, but sometimes Euclidean space isn't al
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist2.png" alt="test-acc" class="center"/>
 </div>
 
-In the two images we see two Guassians (colored orange and blue). 
+In the two images, we see two Gaussians (coloured orange and blue). 
 
-If we parameterize the Guassians by their parameters (i.e their mean value $$\mu$$) then both examples have the same distance between them (shown in red). This is called **parameter space**. However, we see that the distributions in the first image are much closer than the ones in the second.
+If we parameterize the Gaussians by their parameters (i.e their mean value $$\mu$$) then both examples have the same distance between them (shown in red). This is called **parameter space**. However, we see that the distributions in the first image are much closer than the ones in the second.
 
-To solve this problem, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in **distribution space**. Doing so would result in a smaller metric for the first image then the second image, as we would want.
+To solve this problem, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in **distribution space**. Doing so would result in a smaller metric for the first image than the second image, as we would want.
 
 More formally, KL-Divergence (KL-D) measures the distance between two distributions $$p(x \vert \theta')$$ and $$p(x \vert \theta)$$ which are parameterized by $$\theta'$$ and $$\theta$$ and is defined as: 
 
@@ -236,17 +242,17 @@ $$\begin{align*}
 &= \theta^{(k)} - \lambda^{-1}\tilde{\nabla} L(\theta^k) \\
 \end{align*}$$
 
-Where $$\tilde{\nabla} L(\theta^{(k)))$$ is called the **natural gradient**. And this update rule is called **natural gradient descent**. Fantastic! 
+Where $$\tilde{\nabla} L(\theta^{(k)})$$ is called the **natural gradient**. And this update rule is called **natural gradient descent**. Fantastic! 
 
 Now you're probably thinking:
 
-> "Indeed, this is truely fantastic, but how do we apply it to neural networks with weights $$w$$??"
+> "Indeed, this is truly fantastic, we now know how to constrain distributions across iterations using $$D_{KL}$$ but how do we apply it to neural networks with weights $$w$$??"
 
 Patience young padawan, we shall discover this in the following section
 
 # Natural Gradient Descent for Neural Nets 
 
-Though our weights $$w$$ aren't a distribution, usually, our model outputs a distribution $$r( \cdot \vert x)$$. For example, in classification problems like MNIST our model's output a probability distribution over the digits 1 - 10. 
+Though our weights $$w$$ aren't a distribution, usually, our model outputs a distribution $$r( \cdot \vert x)$$. For example, in classification problems like MNIST our model's outputs a probability distribution over the digits 1 - 10. 
 
 The idea is that even though we can't constrain our weights across iterations with KL-D, we can use KL-D to constrain the difference between our output distributions across iterations which is likely to do something similar.
 
@@ -262,7 +268,7 @@ $$
 f*g(x_1, ..., x_k) = g(f(x_1), f(x_2), ..., f(x_k))
 $$
 
-Now similar to the previous sections, lets approximate $$\rho_{\text{pull}}$$ with a second-order taylor expansion. Again, we need to find $$\rho_{\text{pull}}(w, w')\vert_{w = w'}$$, $$\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}$$, and $$\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}$$:
+Now similar to the previous sections, lets approximate $$\rho_{\text{pull}}$$ with a second-order Taylor expansion. Again, we need to find $$\rho_{\text{pull}}(w, w')\vert_{w = w'}$$, $$\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}$$, and $$\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}$$:
 
 $$\begin{align*}
 \rho_{\text{pull}}(w, w')\vert_{w = w'} &= \rho(f(w', x), f(w', x)) \\
@@ -277,14 +283,14 @@ $$\begin{align*}
 
 The last line occurs bc of the chain rule and since we know for $$\nabla \rho = \nabla D_{KL} = 0$$. Notice how pullback functions ($$\rho_{\text{pull}}$$) make the gradients simple to compute :).
 
-Using this decomposition it can be shown that $$\nabla^2 \rho_{\text{pull}}$$ can also be decomposed into the following (check out [this](https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/) for a full derivation): 
+Using this decomposition it can be shown that $$\nabla^2 \rho_{\text{pull}}$$ (in general any hessian/second derivative matrix) can be decomposed into the following (check out [this](https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/) for a full derivation): 
 
 $$\begin{align*}
 \nabla_w^2 \rho_{\text{pull}}(w, w') &= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
 &= \text{J}_{zw}^\intercal H_z \text{J}_{zw}
 \end{align*}$$
 
-Again, the second term disappears since we know $$\nabla \rho = \nabla D_{KL} = 0$$.
+Where $$\text{J}_{zw}$$ is the Jacobian matrix for $$\dfrac{dz}{dw}$$ and $$H_z$$ is the hessian matrix for $$z$$. Again, the second term disappears since we know $$\nabla \rho = \nabla D_{KL} = 0$$.
 
 For the case of $$D_{KL}$$ we know that $$H_z = F_z$$ where $$F_z$$ is the fisher information matrix. And so using the definition of the fisher matrix (i.e $$\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]$$) we can derive our second-order approximation: 
 
@@ -320,15 +326,13 @@ We now see that this results in the **natural gradient method** :o
 
 # Computing the Natural Gradient in JAX 
 
-Theory is amazing but it doesn't mean much if we can't use it. So, to finish it off we're gonna code it! 
+The theory is amazing but it doesn't mean much if we can't use it. So, to finish it off we're gonna code it! 
 
-To do so, we'll write the code in **JAX** (what all the cool kids are using now a days) and train a small MLP model on the MNIST dataset (not the ideal scenario for natural gradient descent to shine but its good to show how everything works).
+To do so, we'll write the code in **JAX** (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset (not the ideal scenario for natural gradient descent to shine but its good to show how everything works).
 
-If you're new to JAX theres a lot of great resources out there to learn from! What do I like about it you ask? Coming from a Computer Science background, I love the functional programming aspect of it which lets you write really clean code :D  
+If you're new to JAX there's a lot of great resources out there to learn from! What do I like about it you ask? Coming from a Computer Science background, I love the functional programming aspect of it which lets you write really clean code :D  
 
 ## Code
-
-In my experience, when theres code available, i'll always skip the words and just read the code myself so in this section i'll mostly let the code speak for itself.
 
 First, we define a small MLP model 
 
@@ -340,11 +344,11 @@ Then we define a few loss functions
 
 Next, we make the losses work for batch input using `vmap`
 
-So clean! :D 
-
 <script src="https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js"></script>
 
-To get a general feel for JAX, we first define a normal gradient step function (we use `@jit` to compile the function which makes it run really fast)
+Single example -> batch data with a single line! So clean! :D 
+
+To get a general feel for JAX, we first define a normal gradient step function (we use `@jit` to compile the function which makes it run fast)
 
 <script src="https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js"></script>
 
@@ -352,7 +356,7 @@ We can then define a natural gradient step using the **empirical fisher matrix**
 
 **Recall**: Our update rule is: $$ \theta_{t+1} = \theta_t - \eta F^{-1} \nabla L$$. So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the [conjugate gradient method](https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf).
 
-**Aside**: Theres a lot of really cool resources to help understand the conjugate gradient method [like this one](https://twitter.com/brennangebotys/status/1410231825868509185?s=20).
+**Aside**: There's a lot of really cool resources to help understand the conjugate gradient method [like this one](https://twitter.com/brennangebotys/status/1410231825868509185?s=20).
 
 <script src="https://gist.github.com/gebob19/2ecb5df93f8f2e7ebb58c0823084bfa6.js"></script>
 
@@ -360,19 +364,32 @@ We can then define a natural gradient step using the **empirical fisher matrix**
 
 Finally, we can define the natural gradient step by sampling from the model's predictions: 
 
-*Note:* To evaluate $$\mathbb{E_{t \sim r(\cdot \vert x)}}[...]$$ we use monte-carlo estimation and sample multiple times from our model distribution which we do using `n_samples`.
+*Note:* To evaluate $$\mathbb{E_{t \sim r(\cdot \vert x)}}[...]$$ we use Monte Carlo estimation and sample multiple times from our model distribution which we do using `n_samples`.
 
 <script src="https://gist.github.com/gebob19/ba7d73eb16c8331cc75a7b5dd49e7ab9.js"></script>
+
+We can also checkout the difference in speed (run on my laptop's CPUs) with a batch size of 2: 
+
+<script src="https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js"></script>
+
+`995 µs ± 172 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # SGD` 
+
+`6.96 ms ± 648 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # Emp NGD (6x slower SGD)`
+
+`1.33 s ± 21.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 1 sample (1000x slower SGD)`
+
+`3.68 s ± 476 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 5 sample (3000x slower SGD)`
 
 Last but not least we define some boilerplate training code and compare the runs: 
 
 <script src="https://gist.github.com/gebob19/7200ee0bfc99274b817896cbade5dd8c.js"></script>
 
+
 Tada! Done! The full code can be found [HERE]().
 
 ## Results 
 
-**Note:** In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients actually blow up (to values up to `1e+20`) to values too big to view on tensorboard (results in error lol). I think this is because our $$\lambda \rightarrow \infty$$ doesn't hold in practice and so when $$\nabla_w L$$ is small, $$\nabla_w L \nabla_w L^\intercal = \text{F}_w$$ is very small and so $$\lambda^{-1} \text{F}_w^{-1} \rightarrow \text{F}_w^{-1}$$ becomes very big, which results in very large gradient values. To get around this, I used gradient clipping (clipped to have values in [-10, 10]). 
+**Note:** In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients actually blow up (to values up to `1e+20`) to values too big to view on tensorboard (still trainable but results in error lol). I'm not exactly sure why this is yet. But, to get around this, I used gradient clipping (clipped to have values in [-10, 10]). 
 
 ***
 
@@ -414,7 +431,7 @@ SGD, Empirical Fisher, Natural Fisher (1 Sample), and Natural Fisher (5 Sample).
 
 Pretty cool stuff!! :D 
 
-Unfortantely in this scenario, I found first-order Natural Gradient Desecent didn't outperform SGD but naturally (pun intended) i'm sure theres cases where it does (different learning rates, clipping values, datasets, etc.). 
+Unfortunately in this scenario, I found first-order Natural Gradient Descent didn't outperform SGD but naturally (pun intended) I'm sure there are cases where it does (different learning rates, clipping values, datasets, etc.). 
 
 Did I do anything wrong? Anything to add? What did you like or dislike? 
 
