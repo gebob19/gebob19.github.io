@@ -8,7 +8,7 @@ image: wave.jpeg
 mathjax: true
 ---
 
-[Photo Link](https://unsplash.com/photos/cYrMQA7a3Wc)
+[Photo Link](https://unsplash.com/s/photos/desktop-hd/i-lost-the-link-:(-/))
 
 ![alt text](https://gebob19.github.io/assets/norm_flow/nf.png "Normalizing Flows (from R-NVP Paper)")
 
