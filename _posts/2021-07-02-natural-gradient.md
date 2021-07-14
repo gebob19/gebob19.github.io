@@ -1,5 +1,5 @@
 ---
-title:  "The Natural Gradient without the Tears"
+title:  "Natural Gradient Descent without the Tears"
 description: "This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient"
 layout: post
 categories: journal

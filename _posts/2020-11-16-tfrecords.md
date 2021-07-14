@@ -4,10 +4,10 @@ description: "In this brief tutorial/example, I explain  the best way to store v
 layout: post
 categories: journal
 tags: [documentation,sample]
-image: nasa2.jpeg
+image: hawaii.jpeg
 mathjax: true
 ---
-[Photo Link](https://unsplash.com/photos/WKT3TE5AQu0)
+[Photo Link](https://unsplash.com/photos/E4944K_4SvI)
 
 Compared to images, loading video data is expensive due to the I/O bottleneck and increased decoding time. This reduces efficiency leading to significantly longer training times. Reading online, there are generally two solutions for data loading videos:
 
