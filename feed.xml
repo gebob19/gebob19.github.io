@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-07-13T21:10:28-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-02T09:32:35-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:&lt;/p&gt;
 
 \[w^* = \underset{w}{\text{argmin}} L(w)\]
 
-&lt;p&gt;Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called &lt;strong&gt;proximal policy optimization&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called a &lt;strong&gt;proximal optimization method&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;To do this, with \(w^{(k)}\) denoting the weights at the \(k\)-th iteration, we can add another term to our loss function \(\rho(w^{(k)}, w^{(k+1)})\) which minimizes how much the weights change between iterations like so:&lt;/p&gt;
 
@@ -143,12 +143,12 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 
 &lt;p&gt;To solve this problem, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in &lt;strong&gt;distribution space&lt;/strong&gt;. Doing so would result in a smaller metric for the first image than the second image, as we would want.&lt;/p&gt;
 
-&lt;p&gt;More formally, KL-Divergence (KL-D) measures the distance between two distributions \(p(x \vert \theta')\) and \(p(x \vert \theta)\) which are parameterized by \(\theta'\) and \(\theta\) and is defined as:&lt;/p&gt;
+&lt;p&gt;More formally, KL-Divergence (KL-D) measures the distance between two distributions \(p(x \vert \theta&apos;)\) and \(p(x \vert \theta)\) which are parameterized by \(\theta&apos;\) and \(\theta\) and is defined as:&lt;/p&gt;
 
 \[\begin{align*}
-D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\log \dfrac{p(x \vert \theta)}{p(x \vert \theta')}] \\
-&amp;amp;= \sum_x p(x|\theta) [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
-&amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
+D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] &amp;amp;= \sum_x p(x|\theta) [\log \dfrac{p(x \vert \theta)}{p(x \vert \theta&apos;)}] \\
+&amp;amp;= \sum_x p(x|\theta) [\log p(x \vert \theta) - \log p(x \vert \theta&apos;)] \\
+&amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta&apos;)] \\
 \end{align*}\]
 
 &lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; KL-D cannot be applied to neural networks with weights \(w\) because it measures the distance between &lt;em&gt;distributions&lt;/em&gt;, which \(w\) is not. To show this difference we will let \(\theta^{(k)}\) parameterize some distribution \(p(x \vert \theta^{(k)})\) at the \(k\)-th step of optimization.&lt;/p&gt;
@@ -162,33 +162,33 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 =&amp;amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
 \end{align*}\]
 
-&lt;p&gt;Similar to last section, lets fisrt approximate \(D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) with a second-order taylor expansion. Recall from the previous section to approximate \(\rho\) with a second-order taylor series we need to define \(\rho\vert_{\theta'=\theta}\), \(\nabla \rho\vert_{\theta'=\theta}\) and \(\nabla^2 \rho\vert_{\theta'=\theta}\).&lt;/p&gt;
+&lt;p&gt;Similar to last section, lets fisrt approximate \(D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) with a second-order taylor expansion. Recall from the previous section to approximate \(\rho\) with a second-order taylor series we need to define \(\rho\vert_{\theta&apos;=\theta}\), \(\nabla \rho\vert_{\theta&apos;=\theta}\) and \(\nabla^2 \rho\vert_{\theta&apos;=\theta}\).&lt;/p&gt;
 
 &lt;p&gt;First, lets derive \(\rho\), \(\nabla \rho\), and \(\nabla^2 \rho\) for \(D_{KL}\)&lt;/p&gt;
 
 \[\begin{align*}
-\rho = D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
-&amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
+\rho = D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] &amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta&apos;)] \\
+&amp;amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta&apos;)] \\
 \end{align*}\]
 
 &lt;p&gt;…&lt;/p&gt;
 
 \[\begin{align*}
 
-\nabla \rho = \nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
-&amp;amp;= - \nabla_{\theta'} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta')] \\
-&amp;amp;= - \nabla_{\theta'} \int p(x \vert \theta) \log p(x \vert \theta') \text{d}x \\
-&amp;amp;= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta') \text{d}x
+\nabla \rho = \nabla_{\theta&apos;} D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] &amp;amp;= \nabla_{\theta&apos;} \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta)] - \nabla_{\theta&apos;} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta&apos;)] \\
+&amp;amp;= - \nabla_{\theta&apos;} \mathbb{E}_{p(x \vert \theta)}[\log p(x \vert \theta&apos;)] \\
+&amp;amp;= - \nabla_{\theta&apos;} \int p(x \vert \theta) \log p(x \vert \theta&apos;) \text{d}x \\
+&amp;amp;= - \int p(x \vert \theta) \nabla_{\theta&apos;} \log p(x \vert \theta&apos;) \text{d}x
 
 \end{align*}\]
 
 &lt;p&gt;…&lt;/p&gt;
 
 \[\begin{align*}
-\nabla^2 \rho = \nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') \text{d}x \\
+\nabla^2 \rho = \nabla_{\theta&apos;}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta&apos;}^2 \log p(x \vert \theta&apos;) \text{d}x \\
 \end{align*}\]
 
-&lt;p&gt;To evaluate \(\rho\vert_{\theta'=\theta}\), \(\nabla \rho\vert_{\theta'=\theta}\) and \(\nabla^2 \rho \vert_{\theta'=\theta}\) we are going to need the two following equations:&lt;/p&gt;
+&lt;p&gt;To evaluate \(\rho\vert_{\theta&apos;=\theta}\), \(\nabla \rho\vert_{\theta&apos;=\theta}\) and \(\nabla^2 \rho \vert_{\theta&apos;=\theta}\) we are going to need the two following equations:&lt;/p&gt;
 
 \[\mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] = 0\]
 
@@ -202,13 +202,13 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 
 \[\begin{align*}
 
-\nabla_{\theta'} D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta'} \log p(x \vert \theta')|_{\theta' = \theta} \text{d}x \\
+\nabla_{\theta&apos;} D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] |_{\theta&apos; = \theta} &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta&apos;} \log p(x \vert \theta&apos;)|_{\theta&apos; = \theta} \text{d}x \\
 &amp;amp;= - \mathbb{E}_{p(x|\theta)} [\nabla_{\theta} \log p(x \vert \theta)] \\
 &amp;amp;= 0
 \end{align*}\]
 
 \[\begin{align*}
-\nabla_{\theta'}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] |_{\theta' = \theta} &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta'}^2 \log p(x \vert \theta') |_{\theta' = \theta} \text{d}x \\
+\nabla_{\theta&apos;}^2 D_{KL}[p(x \vert \theta) \| p(x \vert \theta&apos;)] |_{\theta&apos; = \theta} &amp;amp;= - \int p(x \vert \theta) \nabla_{\theta&apos;}^2 \log p(x \vert \theta&apos;) |_{\theta&apos; = \theta} \text{d}x \\
 &amp;amp;= - \mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] \\
 &amp;amp;= \text{F} \\
 \end{align*}\]
@@ -245,22 +245,22 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 
 &lt;p&gt;More formally, we can define our output distribution as \(z = f(w, x)\) and set \(\rho = D_{KL}\). Then we can define \(\rho_{\text{pull}}\) as the following:&lt;/p&gt;
 
-\[\rho_{\text{pull}}(w, w') = \mathbb{E}_{x}[f_x * \rho(w, w')] = \mathbb{E}[\rho(f(w, x), f(w', x))]\]
+\[\rho_{\text{pull}}(w, w&apos;) = \mathbb{E}_{x}[f_x * \rho(w, w&apos;)] = \mathbb{E}[\rho(f(w, x), f(w&apos;, x))]\]
 
 &lt;p&gt;Where the \(f_x*\rho\) operator is called a pullback operation:&lt;/p&gt;
 
 \[f*g(x_1, ..., x_k) = g(f(x_1), f(x_2), ..., f(x_k))\]
 
-&lt;p&gt;Now similar to the previous sections, lets approximate \(\rho_{\text{pull}}\) with a second-order Taylor expansion. Again, we need to find \(\rho_{\text{pull}}(w, w')\vert_{w = w'}\), \(\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}\), and \(\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}\):&lt;/p&gt;
+&lt;p&gt;Now similar to the previous sections, lets approximate \(\rho_{\text{pull}}\) with a second-order Taylor expansion. Again, we need to find \(\rho_{\text{pull}}(w, w&apos;)\vert_{w = w&apos;}\), \(\nabla \rho_{\text{pull}}(w, w&apos;)\vert_{w = w&apos;}\), and \(\nabla_{\text{pull}}^2 \rho(w, w&apos;)\vert_{w = w&apos;}\):&lt;/p&gt;
 
 \[\begin{align*}
-\rho_{\text{pull}}(w, w')\vert_{w = w'} &amp;amp;= \rho(f(w', x), f(w', x)) \\
+\rho_{\text{pull}}(w, w&apos;)\vert_{w = w&apos;} &amp;amp;= \rho(f(w&apos;, x), f(w&apos;, x)) \\
 &amp;amp;= 0 \\
 \end{align*}\]
 
 \[\begin{align*}
-\nabla_w \rho_{\text{pull}}(w, w')\vert_{w = w'} &amp;amp;= \nabla_w\rho(f(w, x), f(w', x)) \\
-&amp;amp;= \text{J}_{zx}^\intercal \underbrace{\nabla_z\rho(z, z')|_{z=z'}}_{=0} \\ 
+\nabla_w \rho_{\text{pull}}(w, w&apos;)\vert_{w = w&apos;} &amp;amp;= \nabla_w\rho(f(w, x), f(w&apos;, x)) \\
+&amp;amp;= \text{J}_{zx}^\intercal \underbrace{\nabla_z\rho(z, z&apos;)|_{z=z&apos;}}_{=0} \\ 
 &amp;amp;= 0 \\
 \end{align*}\]
 
@@ -269,7 +269,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 &lt;p&gt;Using this decomposition it can be shown that \(\nabla^2 \rho_{\text{pull}}\) (in general any hessian/second derivative matrix) can be decomposed into the following (check out &lt;a href=&quot;https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/&quot;&gt;this&lt;/a&gt; for a full derivation):&lt;/p&gt;
 
 \[\begin{align*}
-\nabla_w^2 \rho_{\text{pull}}(w, w') &amp;amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
+\nabla_w^2 \rho_{\text{pull}}(w, w&apos;) &amp;amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
 &amp;amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw}
 \end{align*}\]
 
@@ -278,7 +278,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 &lt;p&gt;For the case of \(D_{KL}\) we know that \(H_z = F_z\) where \(F_z\) is the fisher information matrix. And so using the definition of the fisher matrix (i.e \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\)) we can derive our second-order approximation:&lt;/p&gt;
 
 \[\begin{align*}
-\nabla_w^2 \rho_{\text{pull}}(w, w') = \text{F}_w &amp;amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \text{F}_z \text{J}_{zw}] \\
+\nabla_w^2 \rho_{\text{pull}}(w, w&apos;) = \text{F}_w &amp;amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \text{F}_z \text{J}_{zw}] \\
 &amp;amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \mathbb{E}_{t \sim r(\cdot \vert x)} [\nabla_z \log r(t \vert x) \nabla_z \log r(t \vert x) ^ \intercal] \text{J}_{zw}] \\
 &amp;amp;= \mathbb{E_{x \sim p_{\text{data}}, {t \sim r(\cdot \vert x)}}} [\nabla_w \log r(t \vert x) \nabla_w \log r(t \vert x) ^ \intercal] \\
 \end{align*}\]
@@ -289,7 +289,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;amp;= \sum_x p(x|\theta) [\
 
 &lt;p&gt;In total, using our approximation we get the following second-order approximation:&lt;/p&gt;
 
-\[\rho_{\text{pull}}(w, w') \approx \dfrac{1}{2} (w - w')^\intercal \text{F}_w (w - w')\]
+\[\rho_{\text{pull}}(w, w&apos;) \approx \dfrac{1}{2} (w - w&apos;)^\intercal \text{F}_w (w - w&apos;)\]
 
 &lt;p&gt;Which again, if we compute the gradient and set it to zero, we get:&lt;/p&gt;
 
@@ -906,7 +906,7 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 &lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; A part could be represented by more than its pose. For example, we could represent a part by its velocity, albedo, or texture but for simplicity, we only consider its pose.&lt;/p&gt;
 
-&lt;p&gt;To extract capsules from the image we pass the image through the CNN and reshape it’s feature vectors to some \(H'\) x \(W'\) x \(CapsuleDim\). This aims to encapsulate parts of the image into the learned manifold.&lt;/p&gt;
+&lt;p&gt;To extract capsules from the image we pass the image through the CNN and reshape it’s feature vectors to some \(H&apos;\) x \(W&apos;\) x \(CapsuleDim\). This aims to encapsulate parts of the image into the learned manifold.&lt;/p&gt;
 
 &lt;p&gt;Since we treat each section of the image as a part, we must also represent the probability that there is a part, which we refer to as the presence probability.&lt;/p&gt;
 
@@ -1193,7 +1193,7 @@ p(z=k \mid x) &amp;amp;= \dfrac{p(x \mid z=k) p(z=k)}{\sum_K p(x \mid z=k) p(z=k
 
 &lt;p&gt;A capsule is represented by a 4x4 pose matrix \(M\) and an activation probability \(a\). Therefore, each capsule will have dimensions (4 x 4 + 1).&lt;/p&gt;
 
-&lt;p&gt;We extract the first level capsules by passing the image through the CNN and then reshaping it’s features to some \(H'\) x \(W'\) x (4 x 4 + 1).&lt;/p&gt;
+&lt;p&gt;We extract the first level capsules by passing the image through the CNN and then reshaping it’s features to some \(H&apos;\) x \(W&apos;\) x (4 x 4 + 1).&lt;/p&gt;
 
 &lt;h2 id=&quot;predictions-1&quot;&gt;Predictions&lt;/h2&gt;
 

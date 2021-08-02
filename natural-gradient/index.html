@@ -56,7 +56,7 @@
 <meta property="twitter:image" content="https://gebob19.github.io/nasa.jpeg" />
 <meta property="twitter:title" content="Natural Gradient Descent without the Tears" />
 <script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"https://gebob19.github.io/natural-gradient/"},"url":"https://gebob19.github.io/natural-gradient/","author":{"@type":"Person","name":"Brennan Gebotys"},"image":"https://gebob19.github.io/nasa.jpeg","description":"This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient","headline":"Natural Gradient Descent without the Tears","dateModified":"2021-07-02T00:00:00-04:00","datePublished":"2021-07-02T00:00:00-04:00","@type":"BlogPosting","@context":"https://schema.org"}</script>
+{"image":"https://gebob19.github.io/nasa.jpeg","description":"This blog post/tutorial dives deep into the theory and JAX code (similar to Pytorch and Tensorflow) for understanding the natural gradient and how to code approximations of the natural gradient","headline":"Natural Gradient Descent without the Tears","dateModified":"2021-07-02T00:00:00-04:00","datePublished":"2021-07-02T00:00:00-04:00","url":"https://gebob19.github.io/natural-gradient/","mainEntityOfPage":{"@type":"WebPage","@id":"https://gebob19.github.io/natural-gradient/"},"author":{"@type":"Person","name":"Brennan Gebotys"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -114,7 +114,7 @@
 
 \[w^* = \underset{w}{\text{argmin}} L(w)\]
 
-<p>Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called <strong>proximal policy optimization</strong>.</p>
+<p>Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called a <strong>proximal optimization method</strong>.</p>
 
 <p>To do this, with \(w^{(k)}\) denoting the weights at the \(k\)-th iteration, we can add another term to our loss function \(\rho(w^{(k)}, w^{(k+1)})\) which minimizes how much the weights change between iterations like so:</p>
 
