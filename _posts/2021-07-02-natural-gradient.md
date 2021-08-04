@@ -14,7 +14,7 @@ To set the scene, suppose we have a model with weights $$w$$ and some loss funct
 
 $$w^* = \underset{w}{\text{argmin}} L(w)$$
 
-Suppose good ol' SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called **proximal policy optimization**. 
+Suppose good ol' SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called a **proximal optimization method**. 
 
 To do this, with $$w^{(k)}$$ denoting the weights at the $$k$$-th iteration, we can add another term to our loss function $$\rho(w^{(k)}, w^{(k+1)})$$ which minimizes how much the weights change between iterations like so: 
 
@@ -437,7 +437,29 @@ Did I do anything wrong? Anything to add? What did you like or dislike?
 
 Let me know -- tweet, email, or dm me! :D 
 
+## Further Reading 
 
+### Problems with Inversion - Conjugate Gradient & Preconditioners
+
+Problems when solving for $F^{-1} \nabla L$ -- Conjugate Gradient Section @  [http://www.depthfirstlearning.com/2018/TRPO](http://www.depthfirstlearning.com/2018/TRPO)
+
+### Problems with Linearlizing
+
+Recall: We linearlize our solution with a Taylor-Approx and then solve for the optimal to make a step. 
+
+Problem: The optimal of the Taylor-Approx may not be the actual optimal. When the optimal is a large step away it may make the update even worse (see diagram below).  
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png" alt="test-acc" class="center"/>
+</div>
+
+Soln: We can add another term $$\| w^{(k+1)} - w^{(k)}\|^2$$ to make sure we don't take large steps where our approximation is inaccurate. This leads to a dampened update.
+
+### More MOre MORe MORE
+
+[https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf](https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf)
+
+[http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf](http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf)
 
 
 
