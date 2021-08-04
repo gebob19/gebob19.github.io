@@ -527,6 +527,30 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p>Let me know – tweet, email, or dm me! :D</p>
 
+<h2 id="further-reading-and-things">Further Reading and Things</h2>
+
+<h3 id="problems-with-inversion---conjugate-gradient--preconditioners">Problems with Inversion - Conjugate Gradient &amp; Preconditioners</h3>
+
+<p>Problems when solving for $F^{-1} \nabla L$ – Conjugate Gradient Section – Stanford Lectures @  <a href="http://www.depthfirstlearning.com/2018/TRPO">http://www.depthfirstlearning.com/2018/TRPO</a></p>
+
+<h3 id="problems-with-linearlizing">Problems with Linearlizing</h3>
+
+<p>Recall: We linearlize our solution with a Taylor-Approx and then solve for the optimal to make a step.</p>
+
+<p>Problem: The optimal of the Taylor-Approx may not be the actual optimal. When the optimal is a large step away it may make the update even worse (see quick hand-drawn diagram below where we would end up at $\hat{f}_{optimal}$ which leads to a much worse value of $f(x)$ than than our starting position $x$).</p>
+
+<div align="center" width="500" height="100">
+<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png" alt="test-acc" class="center" />
+</div>
+
+<p>Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a dampened update.</p>
+
+<h3 id="more-more-more-more">More MOre MORe MORE</h3>
+
+<p><a href="https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf">https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf</a></p>
+
+<p><a href="http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf">http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf</a></p>
+
 
 </article>
 
