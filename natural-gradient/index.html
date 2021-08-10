@@ -486,11 +486,76 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 <p>Here are the tensorboard results:</p>
 
 <h3 id="test-accuracy">Test Accuracy</h3>
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/testacc.png" alt="test-acc" class="center" />
-</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optim Method</th>
+      <th>Test Accuracy (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Vanilla-SGD</td>
+      <td>95.99</td>
+    </tr>
+    <tr>
+      <td>NGrad-(Emp)</td>
+      <td>92.77</td>
+    </tr>
+    <tr>
+      <td>NGrad-(1sample)</td>
+      <td>90.06</td>
+    </tr>
+    <tr>
+      <td>NGrad-(5sample)</td>
+      <td>89.52</td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="train-loss">Train Loss</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optim Method</th>
+      <th>Train Loss (CE)</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Vanilla-SGD</td>
+      <td>0.1637</td>
+      <td>37s</td>
+    </tr>
+    <tr>
+      <td>NGrad-(Emp)</td>
+      <td>0.3141</td>
+      <td>8m 33s</td>
+    </tr>
+    <tr>
+      <td>NGrad-(1sample)</td>
+      <td>0.3999</td>
+      <td>4m 4s</td>
+    </tr>
+    <tr>
+      <td>NGrad-(5sample)</td>
+      <td>0.411</td>
+      <td>4m 9s</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Bc you can’t change Tensorboard colors, hopefully this will help: at iteration 100 the methods ordered by smallest to largest loss value is:</p>
+<ul>
+  <li>Vanilla-SGD</li>
+  <li>NGrad-(5sample)</li>
+  <li>NGrad-(1sample)</li>
+  <li>NGrad-(Emp)</li>
+</ul>
+
 <div align="center" width="500" height="100">
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/loss.png" alt="train-loss" class="center" />
 </div>

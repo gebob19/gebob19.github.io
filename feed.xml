@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-10T15:58:52-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-10T16:07:16-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:&lt;/p&gt;
 
@@ -376,11 +376,76 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 &lt;p&gt;Here are the tensorboard results:&lt;/p&gt;
 
 &lt;h3 id=&quot;test-accuracy&quot;&gt;Test Accuracy&lt;/h3&gt;
-&lt;div align=&quot;center&quot; width=&quot;500&quot; height=&quot;100&quot;&gt;
-&lt;img src=&quot;https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/testacc.png&quot; alt=&quot;test-acc&quot; class=&quot;center&quot; /&gt;
-&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Optim Method&lt;/th&gt;
+      &lt;th&gt;Test Accuracy (%)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Vanilla-SGD&lt;/td&gt;
+      &lt;td&gt;95.99&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(Emp)&lt;/td&gt;
+      &lt;td&gt;92.77&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(1sample)&lt;/td&gt;
+      &lt;td&gt;90.06&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(5sample)&lt;/td&gt;
+      &lt;td&gt;89.52&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h3 id=&quot;train-loss&quot;&gt;Train Loss&lt;/h3&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Optim Method&lt;/th&gt;
+      &lt;th&gt;Train Loss (CE)&lt;/th&gt;
+      &lt;th&gt;Time&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Vanilla-SGD&lt;/td&gt;
+      &lt;td&gt;0.1637&lt;/td&gt;
+      &lt;td&gt;37s&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(Emp)&lt;/td&gt;
+      &lt;td&gt;0.3141&lt;/td&gt;
+      &lt;td&gt;8m 33s&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(1sample)&lt;/td&gt;
+      &lt;td&gt;0.3999&lt;/td&gt;
+      &lt;td&gt;4m 4s&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NGrad-(5sample)&lt;/td&gt;
+      &lt;td&gt;0.411&lt;/td&gt;
+      &lt;td&gt;4m 9s&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Bc you can’t change Tensorboard colors, hopefully this will help: at iteration 100 the methods ordered by smallest to largest loss value is:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Vanilla-SGD&lt;/li&gt;
+  &lt;li&gt;NGrad-(5sample)&lt;/li&gt;
+  &lt;li&gt;NGrad-(1sample)&lt;/li&gt;
+  &lt;li&gt;NGrad-(Emp)&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;div align=&quot;center&quot; width=&quot;500&quot; height=&quot;100&quot;&gt;
 &lt;img src=&quot;https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/loss.png&quot; alt=&quot;train-loss&quot; class=&quot;center&quot; /&gt;
 &lt;/div&gt;
