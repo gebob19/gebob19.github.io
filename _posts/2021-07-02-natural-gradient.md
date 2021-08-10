@@ -455,7 +455,11 @@ Problem: The optimal of the Taylor-Approx may not be the actual optimal. When th
 
 Soln: We can add another term $$\| w^{(k+1)} - w^{(k)}\|^2$$ to our loss to make sure we don't take large steps where our approximation is inaccurate. This leads to a dampened update.
 
-### More MOre MORe MORE
+Soln2: Use Trust Region Optimization 
+
+### More Resources
+
+[2nd-order Optimization for Neural Network Training from jmartens](https://www.youtube.com/watch?v=qAVZd6dHxPA)
 
 [https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf](https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf)
 
