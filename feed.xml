@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-04T17:19:40-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-10T15:58:52-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:&lt;/p&gt;
 
@@ -435,7 +435,11 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 &lt;p&gt;Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a dampened update.&lt;/p&gt;
 
-&lt;h3 id=&quot;more-more-more-more&quot;&gt;More MOre MORe MORE&lt;/h3&gt;
+&lt;p&gt;Soln2: Use Trust Region Optimization&lt;/p&gt;
+
+&lt;h3 id=&quot;more-resources&quot;&gt;More Resources&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=qAVZd6dHxPA&quot;&gt;2nd-order Optimization for Neural Network Training from jmartens&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf&quot;&gt;https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf&lt;/a&gt;&lt;/p&gt;
 
