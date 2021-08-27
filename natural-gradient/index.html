@@ -124,7 +124,7 @@
 
 <hr />
 
-<p>Most of this post is created in reference to Roger Grosse’s ‘Neural Net Training Dynamics’ course. The course can be found <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">here</a> and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of thier own.</p>
+<p>Most of this post is created in reference to Roger Grosse’s ‘Neural Net Training Dynamics’ course. The course can be found <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">here</a> and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of their own.</p>
 
 <hr />
 
@@ -215,7 +215,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) \\
 &amp;= \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)}) 
 \end{align*}\]
 
-<p>Using the second-order approx of \(\rho\) with the first-order approx of \(L\) which we derived last section we get the following loss function:</p>
+<p>Using the second-order approx of \(\rho\) with the first-order approx of \(L\) which we derived in the last section we get the following loss function:</p>
 
 \[\begin{align*}
 \text{prox}_{L, \lambda}(w^{(k)}) =&amp; \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ] \\
@@ -240,7 +240,9 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 
 <h1 id="kl-divergence">KL Divergence</h1>
 
-<p>Now, Euclidean space is great, but sometimes Euclidean space isn’t always that great (example taken from <a href="https://wiseodd.github.io/about/">here</a>):</p>
+<p>Now, Euclidean space is great, but sometimes Euclidean space isn’t always that great:</p>
+
+<h2 id="why-kl-ex-1">Why KL? Ex 1</h2>
 
 <div align="center" width="500" height="100">
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist.png" alt="test-acc" class="center" />
@@ -250,7 +252,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist2.png" alt="test-acc" class="center" />
 </div>
 
-<p>In the two images, we see two Gaussians (coloured orange and blue).</p>
+<p>In the two images, we see two Gaussians (coloured orange and blue)(example taken from <a href="https://wiseodd.github.io/about/">here</a>).</p>
 
 <p>If we parameterize the Gaussians by their parameters (i.e their mean value \(\mu\)) then both examples have the same Euclidean distance between them (shown in red). This is called <strong>parameter space</strong>. However, we see that the distributions in the first image are much closer than the ones in the second.</p>
 
@@ -258,7 +260,13 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 
 <p>To achieve this, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in <strong>distribution space</strong>.</p>
 
-<p>More formally, KL-Divergence (KL-D) measures the distance between two distributions \(p(x \vert \theta')\) and \(p(x \vert \theta)\) which are parameterized by \(\theta'\) and \(\theta\) and is defined as:</p>
+<h2 id="why-kl-ex-2">Why KL? Ex 2</h2>
+
+<p>Another reason we may prefer KL Divergence over Euclidean distance is that it minimizes the change of our model’s output directly. For example, if we were to only minimize the change of our weights, a small change in our weights may lead to a large difference in our model’s predictions which we wouldn’t want.</p>
+
+<h2 id="kl">KL</h2>
+
+<p>More formally, KL-Divergence (\(D_{KL}\)) measures the distance between two distributions \(p(x \vert \theta')\) and \(p(x \vert \theta)\) which are parameterized by \(\theta'\) and \(\theta\) and is defined as:</p>
 
 \[\begin{align*}
 D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log \dfrac{p(x \vert \theta)}{p(x \vert \theta')}] \\
@@ -266,7 +274,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 &amp;= \mathbb{E}_{p(x \vert \theta)} [\log p(x \vert \theta) - \log p(x \vert \theta')] \\
 \end{align*}\]
 
-<p><em>Note:</em> KL-D cannot be applied to neural networks with weights \(w\) because it measures the distance between <em>distributions</em>, which \(w\) is not. To show this difference we will let \(\theta^{(k)}\) parameterize some distribution \(p(x \vert \theta^{(k)})\) at the \(k\)-th step of optimization.</p>
+<p><em>Note:</em> \(D_{KL}\) cannot be applied to neural networks with weights \(w\) because it measures the distance between <em>distributions</em>, which \(w\) is not. To show this difference we will let \(\theta^{(k)}\) parameterize some distribution \(p(x \vert \theta^{(k)})\) at the \(k\)-th step of optimization.</p>
 
 <p><em>Teaser:</em> We’ll see how to apply this to neural nets later ;)</p>
 
@@ -276,6 +284,8 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 \theta^* = \text{prox}_{L, \lambda}(\theta^{(k)}) =&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
 =&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}}) ] \\ 
 \end{align*}\]
+
+<h2 id="nabla-d_kl-and-nabla2-d_kl">\(\nabla D_{KL}\) and \(\nabla^2 D_{KL}\)</h2>
 
 <p>Similar to last section, lets fisrt approximate \(D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) with a second-order taylor expansion. Recall from the previous section to approximate \(\rho\) with a second-order taylor series we need to define \(\rho\vert_{\theta'=\theta}\), \(\nabla \rho\vert_{\theta'=\theta}\) and \(\nabla^2 \rho\vert_{\theta'=\theta}\).</p>
 
@@ -349,13 +359,15 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
   <p>“Indeed, this is fantastic, we now know how to constrain distributions across iterations using \(D_{KL}\) but how do we apply it to neural networks with weights \(w\)??”</p>
 </blockquote>
 
-<p>Excellent question, lets check it out in the next section</p>
+<p>Excellent question, let’s check it out in the next section</p>
 
 <h1 id="natural-gradient-descent-for-neural-nets">Natural Gradient Descent for Neural Nets</h1>
 
 <p>Though our weights \(w\) aren’t a distribution, usually, our model outputs a distribution \(r( \cdot \vert x)\). For example, in classification problems like MNIST our model’s outputs a probability distribution over the digits 1 - 10 (\(p( y \vert x)\)).</p>
 
 <p>The idea is that even though we can’t constrain our weights across iterations with \(D_{KL}\), we can use \(D_{KL}\) to constrain the difference between our output distributions across iterations which is likely to do something similar.</p>
+
+<h2 id="decomposition-trick">Decomposition Trick</h2>
 
 <p>To do this, we need to use a trick. Specifically, we need to decompose \(\rho\) into two parts:</p>
 <ol>
@@ -366,6 +378,8 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 <p>Then we can define the full \(\rho_{\text{pull}}\) as the composition of the two parts:</p>
 
 \[\rho_{\text{pull}} = \rho(f(w^{(k)}, x), f(w^{(k+1)}, x))\]
+
+<h2 id="rho_textpull-and-nabla-rho_textpull">\(\rho_{\text{pull}}\) and \(\nabla \rho_{\text{pull}}\)</h2>
 
 <p>Now similar to the previous sections, lets approximate \(\rho_{\text{pull}}\) with a second-order Taylor expansion. Again, we need to find \(\rho_{\text{pull}}(w, w')\vert_{w = w'}\), \(\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}\), and \(\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}\):</p>
 
@@ -384,7 +398,9 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 
 <p>We derive the last line by using the chain rule and the fact that \(\nabla \rho = \nabla D_{KL} = 0\) (derived in the previous section).</p>
 
-<p>Now to show the power of the two-part decompositon we used…</p>
+<p>Now to show the power of the two-part decomposition we used…</p>
+
+<h2 id="decomposing-nabla2-rho_textpull--the-guass-newton-hessian">Decomposing \(\nabla^2 \rho_{\text{pull}}\) – The Guass-Newton Hessian</h2>
 
 <p>Using the two-part decomposition it can be shown that \(\nabla^2 \rho_{\text{pull}}\) (in general any hessian/second derivative matrix) can be represented as the following (check out <a href="https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/">this</a> for a full derivation):</p>
 
@@ -392,7 +408,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 \nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \sum_a \dfrac{d \rho}{dz_a} \nabla^2_w [f(x, w)]_a\\
 \end{align*}\]
 
-<p>Now lets better understand what this representation means. This shows that $\nabla_w^2 \rho_{\text{pull}}(w, w’)$ can be represented as two parts:</p>
+<p>Now let’s better understand what this representation means. This shows that $\nabla_w^2 \rho_{\text{pull}}(w, w’)$ can be represented as two parts:</p>
 
 \[\text{J}_{zw}^\intercal H_z \text{J}_{zw}\]
 
@@ -403,10 +419,10 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 \[\sum_a \dfrac{d \rho}{dz_a} \nabla^2_w [f(x, w)]_a\]
 
 <ul>
-  <li>Second derivaties of the network (i.e $\nabla^2_w [f(x, w)]_a$) and first derivatives of $\rho$ (i.e, $\dfrac{d \rho}{dz_a}$)</li>
+  <li>Second derivaties of the network (i.e, $\nabla^2_w [f(x, w)]_a$) and first derivatives of $\rho$ (i.e, $\dfrac{d \rho}{dz_a}$)</li>
 </ul>
 
-<p>Usually computing and storing second derivaties of the network is very expensive (for a network with $n$ parameters the second derivative matrix will be of size $n \times n$ where $n$ is usually in millions for neural networks). Luckily though, since we know \(\nabla \rho = \nabla D_{KL} = 0\) we drop the second derivatives:</p>
+<p>Usually computing and storing second derivatives of the network is very expensive (for a network with $n$ parameters the second derivative matrix will be of size $n \times n$ where $n$ is usually in millions for neural networks). Luckily though, since we know \(\nabla \rho = \nabla D_{KL} = 0\) we drop the second derivatives:</p>
 
 \[\begin{align*}
 \nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
@@ -414,6 +430,8 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 \end{align*}\]
 
 <p><em>Note:</em> When \(\nabla \rho \neq 0\) we can approximate \(\nabla_w^2 \rho_{\text{pull}}\) by just setting \(\nabla \rho = 0\), using \(\text{J}_{zw}^\intercal H_z \text{J}_{zw}\) and hope for the best lol. This formulation is called the <strong>Guass-Newton Hessian</strong>. In this case though ($\rho = D_{KL}$), the Guass-Newton Hessian is the exact solution.</p>
+
+<h2 id="natural-gradient-descent">Natural Gradient Descent</h2>
 
 <p>In the previous section we derived that \(\nabla^2 \rho = \nabla^2 D_{KL} = H_z = F_z\) where \(F_z\) is the fisher information matrix. And so using the definition of the fisher matrix (i.e \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\)) with our networks output we can derive our second-order approximation:</p>
 
@@ -468,7 +486,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <script src="https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js"></script>
 
-<p>Single example -&gt; batch data with a single line? yes please</p>
+<p>Single example -&gt; batch data with a single line? yes, please</p>
 
 <p>To get a general feel for JAX, we first define a normal gradient step function (we use <code class="language-plaintext highlighter-rouge">@jit</code> to compile the function which makes it run fast)</p>
 
@@ -476,7 +494,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p>We can then define a natural gradient step using the <strong>empirical fisher matrix</strong>:</p>
 
-<p><em>Note:</em> To compute \(\text{F}_w\) we directly compute and store the exact Fisher for a small network, however this can be further improved in terms of speed and memory storage. I may write about how to do this in another post.</p>
+<p><em>Note:</em> To compute \(\text{F}_w\) we directly compute and store the exact Fisher for a small network, however, this can be further improved in terms of speed and memory storage. I may write about how to do this in another post.</p>
 
 <p><strong>Recall</strong>: Our update rule is: \(\theta_{t+1} = \theta_t - \eta F^{-1} \nabla L\). So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the <a href="https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf">conjugate gradient method</a>. I won’t go into detail here, but deciding how to solve for \(F^{-1} \nabla L\) is a post on its own.</p>
 
@@ -492,7 +510,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <script src="https://gist.github.com/gebob19/ba7d73eb16c8331cc75a7b5dd49e7ab9.js"></script>
 
-<p>We can also checkout the difference in speed (run on my laptop’s CPUs) with a batch size of 2:</p>
+<p>We can also check out the difference in speed (run on my laptop’s CPUs) with a batch size of 2:</p>
 
 <script src="https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js"></script>
 
@@ -512,7 +530,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <h2 id="results">Results</h2>
 
-<p><strong>Note:</strong> In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients actually blow up (to values up to <code class="language-plaintext highlighter-rouge">1e+20</code>) to values too big to view on tensorboard (still trainable but results in error lol). I’m not exactly sure why this is yet. But, to get around this, I used gradient clipping (clipped to have values in [-10, 10]).</p>
+<p><strong>Note:</strong> In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients blow up (to values up to <code class="language-plaintext highlighter-rouge">1e+20</code>) to values too big to view on tensorboard (still trainable but results in error lol). I’m not exactly sure why this is yet. But, to get around this, I used gradient clipping (clipped to have values in [-10, 10]).</p>
 
 <hr />
 
@@ -581,7 +599,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
   </tbody>
 </table>
 
-<p>Bc you can’t change Tensorboard colors, hopefully this will help: at iteration 100 the methods ordered by smallest to largest loss value is:</p>
+<p>Because you can’t change Tensorboard colors, hopefully this will help: at iteration 100 the methods ordered by smallest to largest loss value is:</p>
 <ul>
   <li>Vanilla-SGD</li>
   <li>NGrad-(5sample)</li>
@@ -595,11 +613,11 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <h3 id="weights--gradients">Weights &amp; Gradients</h3>
 
-<p>The diagrams in the following order:</p>
+<p>The diagrams are in the following order:</p>
 
 <p>SGD, Empirical Fisher, Natural Fisher (1 Sample), and Natural Fisher (5 Sample).</p>
 
-<p><em>Note:</em> Each diagram uses its own scale.</p>
+<p><em>Note:</em> Each diagram uses its scale.</p>
 
 <h4 id="linear-0">Linear 0</h4>
 <div align="center" width="500" height="100">
@@ -633,9 +651,9 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <h3 id="problems-with-linearlizing">Problems with Linearlizing</h3>
 
-<p>Recall: We linearlize our solution with a Taylor-Approx and then solve for the optimal to make a step.</p>
+<p>Recall: We linearize our solution with a Taylor-Approx and then solve for the optimal to take a step.</p>
 
-<p>Problem: The optimal of the Taylor-Approx may not be the actual optimal. When the optimal is a large step away it may make the update even worse (see quick hand-drawn diagram below where we would end up at $\hat{f}_{optimal}$ which leads to a much worse value of $f(x)$ than than our starting position $x$).</p>
+<p>Problem: The optimal of the Taylor-Approx may not be the actual optimal. When the optimal is a large step away it may make the update even worse (see quick hand-drawn diagram below where we would end up at $\hat{f}_{optimal}$ which leads to a much worse value of $f(x)$ than our starting position $x$).</p>
 
 <div align="center" width="500" height="100">
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png" alt="test-acc" class="center" />
