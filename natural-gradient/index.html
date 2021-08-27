@@ -114,17 +114,17 @@
 
 \[w^* = \underset{w}{\text{argmin}} L(w)\]
 
-<p>Suppose good ol’ SGD optimization creates noisy gradients or has a high variance (e.g policy gradient methods in RL). One thing we could do to smooth out the optimization procedure is minimize how much our weights change between optimization iterations. This is called a <strong>proximal optimization method</strong>.</p>
+<p>Suppose we want to minimize how much our weights change between optimization iterations.</p>
 
 <p>To do this, with \(w^{(k)}\) denoting the weights at the \(k\)-th iteration, we can add another term to our loss function \(\rho(w^{(k)}, w^{(k+1)})\) which minimizes how much the weights change between iterations like so:</p>
 
 \[w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ]\]
 
-<p>where \(\lambda\) controls how much we want the weights to change between iterations (larger \(\lambda\) = less change).</p>
+<p>where \(\lambda\) controls how much the weights change between iterations (i.e larger \(\lambda\) = less change). This is called a <strong>proximal optimization method</strong>.</p>
 
 <hr />
 
-<p>Most of this post is created in reference to Roger Grosse’s fantastic ‘Neural Net Training Dynamics’ course. The course can be found <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">here</a> and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of thier own.</p>
+<p>Most of this post is created in reference to Roger Grosse’s ‘Neural Net Training Dynamics’ course. The course can be found <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">here</a> and I would highly recommend checking it out. Though there are no lecture recordings, the course notes are in a league of thier own.</p>
 
 <hr />
 
@@ -138,7 +138,7 @@
 
 \[w^{(k+1)} = \text{prox}_{L, \lambda}(w^{(k)}) = \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \dfrac{1}{2} \|w^{(k+1)} - w^{(k)}\|^2 ]\]
 
-<p>Lets try to solve for the optimum (i.e \(w^{(k+1)} = w^*\)) by computing the grad and setting to 0. If we do so, we get:</p>
+<p>Lets try to solve for the optimum (i.e \(w^{(k+1)} = w^*\)) by computing the grad and setting it = 0:</p>
 
 \[\begin{align*}
 0 &amp;= \nabla L(w^*) + \lambda (w^* - w^{(k)}) \\
@@ -146,13 +146,9 @@
 w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^*) \\
 \end{align*}\]
 
-<p>Note that \(\nabla L\) is defined at \(w^*\) so we can’t directly use the result. But the equation looks very similar to SGD. Naturally, you’re probably wondering:</p>
+<p>The equation looks very similar to SGD however, \(\nabla L\) is defined at \(w^*\), which we don’t know, so we can’t directly use this result.</p>
 
-<blockquote>
-  <p>“Brennan, why did you introduce a result which we can’t even use? This is blasphemy.”</p>
-</blockquote>
-
-<p>Well fear not my fellow gradient friends, to solve this there are a few approximations we could use…</p>
+<p>Although we can’t use this result directly, there are a few approximations we could use to make the result useful…</p>
 
 <h1 id="first-order-approximation-of-l-around-wk">First Order Approximation of \(L\) around \(w^{(k)}\)</h1>
 
@@ -160,7 +156,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^*) \\
 
 <hr />
 
-<p>One possible way to use the result and constrain our weights is to approximate \(L(w^{(k+1)})\) with a first-order Taylor series around \(w^{(k)}\):</p>
+<p>One possible way to use the result is to approximate \(L(w^{(k+1)})\) with a first-order Taylor series around \(w^{(k)}\):</p>
 
 \[L(w^{(k+1)}) = L(w^{(k)}) + \nabla L(w^{(k)})^\intercal(w^{(k+1)} - w^{(k)})\]
 
@@ -174,18 +170,23 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^*) \\
 
 \end{align*}\]
 
-<p>Note we go from the second to the third line since \(\text{argmin}_{w^{(k+1)}}\) ignores any terms without \(w^{(k+1)}\).</p>
+<p><em>Note:</em> we go from the second to the third line since \(\text{argmin}_{w^{(k+1)}}\) ignores any terms without \(w^{(k+1)}\).</p>
 
-<p>Then similar to the previous section lets computing the gradient with respect to \(w^{(k+1)}\) and set it to zero:</p>
+<p>Then similar to the previous section, we can solve for the optimum by computing the gradient and setting it = 0:</p>
 
 \[\begin{align*}
 0 &amp;= \nabla L(w^{(k)}) + \lambda (w^* - w^{(k)}) \\
 w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) \\
 \end{align*}\]
 
-<p>We see that this is gradient descent. Interesting! Notice how if we want our weights to be very close together across iterations then we would set \(\lambda\) to be a large value so \(\lambda^{-1}\) would be a small value and so we would be taking very small gradient steps to reduce large changes in our weights across iterations.</p>
+<p>The result is standard gradient descent!</p>
 
-<p>This means that in Euclidean space, proximal policy optimization approximated with a first-order Taylor is the same as regular gradient descent.</p>
+<p>Notice how if we want our weights to be very close together across iterations then we would set \(\lambda\) to be a large value so \(\lambda^{-1}\) would be a small value and so we would be taking very small gradient steps to reduce large changes in our weights across iterations.</p>
+
+<p>This means that in Euclidean space:</p>
+<ul>
+  <li>proximal optimization approximated with a first-order Taylor is the same as regular gradient descent.</li>
+</ul>
 
 <h1 id="use-a-second-order-approximation-of-rho">Use a Second-Order Approximation of \(\rho\)</h1>
 
@@ -199,20 +200,22 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \nabla L(w^{(k)}) \\
 
 \[\rho (w^{(k+1)}, w^{(k)}) = \dfrac{1}{2} \|w^{(k)} - w^{(k+1)} \|^2 \approx \dfrac{1}{2} \|w^{(k)} - w^{(k)} \|^2 = 0\]
 
-<p>and</p>
+<p>…</p>
 
 \[\nabla \rho (w^{(k+1)}, w^{(k)}) = (w^{(k)} - w^{(k+1)}) \approx (w^{(k)} - w^{(k)}) = 0\]
 
-<p>Since both \(\rho\) and \(\nabla \rho\) are both \(0\) when we approx \(\rho\) with a second-order Taylor series, we are left with only our second order approximation (\(\nabla^2 \rho\)):</p>
+<p>…</p>
+
+\[\nabla^2 \rho (w^{(k+1)}, w^{(k)}) = 1\]
+
+<p>Since both \(\rho\) and \(\nabla \rho\) are both \(0\) when we approx \(\rho\) with a second-order Taylor series, we are left with only our second order approximation (\(\nabla^2 \rho = G = \text{I}\)):</p>
 
 \[\begin{align*}
 \rho (w^{(k+1)}, w^{(k)}) &amp;\approx \rho(w^{(k+1)}, w^{(k)}) + \nabla \rho(w^{(k+1)}, w^{(k)})^\intercal (w^{(k+1)} - w^{(k)}) + \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)}) \\
-&amp;= \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)})
+&amp;= \dfrac{1}{2} (w^{(k+1)} - w^{(k)})^\intercal G (w^{(k+1)} - w^{(k)}) 
 \end{align*}\]
 
-<p>where \(G = \nabla^2 \rho (w^{(k+1)}, w^{(k)}) \vert_{w^{(k+1)} = w^{(k)}}\).</p>
-
-<p>Using the second-order approx of \(\rho\) with the first-order approx of \(L\) which we derived last section we get the following:</p>
+<p>Using the second-order approx of \(\rho\) with the first-order approx of \(L\) which we derived last section we get the following loss function:</p>
 
 \[\begin{align*}
 \text{prox}_{L, \lambda}(w^{(k)}) =&amp; \underset{w^{(k+1)}}{\text{argmin}} [ L(w^{(k+1)}) + \lambda \rho(w^{(k)}, w^{(k+1)}) ] \\
@@ -237,7 +240,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 
 <h1 id="kl-divergence">KL Divergence</h1>
 
-<p>Now Euclidean space is overall fantastic, but sometimes Euclidean space isn’t always that great (example taken from <a href="https://wiseodd.github.io/about/">here</a>):</p>
+<p>Now, Euclidean space is great, but sometimes Euclidean space isn’t always that great (example taken from <a href="https://wiseodd.github.io/about/">here</a>):</p>
 
 <div align="center" width="500" height="100">
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/param_space_dist.png" alt="test-acc" class="center" />
@@ -249,9 +252,11 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{G}^{-1} \nabla L(w^{(k)}) \\
 
 <p>In the two images, we see two Gaussians (coloured orange and blue).</p>
 
-<p>If we parameterize the Gaussians by their parameters (i.e their mean value \(\mu\)) then both examples have the same distance between them (shown in red). This is called <strong>parameter space</strong>. However, we see that the distributions in the first image are much closer than the ones in the second.</p>
+<p>If we parameterize the Gaussians by their parameters (i.e their mean value \(\mu\)) then both examples have the same Euclidean distance between them (shown in red). This is called <strong>parameter space</strong>. However, we see that the distributions in the first image are much closer than the ones in the second.</p>
 
-<p>To solve this problem, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in <strong>distribution space</strong>. Doing so would result in a smaller metric for the first image than the second image, as we would want.</p>
+<p>Ideally, we would want a smaller metric for the first image than the second image.</p>
+
+<p>To achieve this, a better measurement would be to use the KL-Divergence between the distributions. This measures the distance in <strong>distribution space</strong>.</p>
 
 <p>More formally, KL-Divergence (KL-D) measures the distance between two distributions \(p(x \vert \theta')\) and \(p(x \vert \theta)\) which are parameterized by \(\theta'\) and \(\theta\) and is defined as:</p>
 
@@ -265,7 +270,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 
 <p><em>Teaser:</em> We’ll see how to apply this to neural nets later ;)</p>
 
-<p>Lets assume we want \(\theta^{(k)}\) and \(\theta^{(k+1)}\) to be close across steps. Then we can let \(\rho(\theta^{(k)}, \theta^{(k+1)}) = D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) where \(p_{\theta^{(k)}} = p(x \vert \theta^{(k)})\). And so, we will want to solve for:</p>
+<p>Lets assume were minimizing a loss function \(L\) parameterized by \(\theta\) and that we want \(\theta^{(k)}\) and \(\theta^{(k+1)}\) to be close across steps. Then we can let \(\rho(\theta^{(k)}, \theta^{(k+1)}) = D_{KL}(p_{\theta^{(k)}} \| p_{\theta^{(k+1)}})\) where \(p_{\theta^{(k)}} = p(x \vert \theta^{(k)})\). And so, we will want to solve for:</p>
 
 \[\begin{align*}
 \theta^* = \text{prox}_{L, \lambda}(\theta^{(k)}) =&amp; \underset{\theta^{(k+1)}}{\text{argmin}} [ L(\theta^{(k+1)}) + \lambda \rho(\theta^{(k)}, \theta^{(k+1)}) ] \\ 
@@ -306,7 +311,7 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 
 \[\mathbb{E}_{p(x|\theta)} [ \nabla_{\theta}^2 \log p(x \vert \theta) ] = -\text{F}\]
 
-<p>Where \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\) is the fisher information matrix. For the full derivation of these eqns checkout <a href="https://wiseodd.github.io/techblog/2018/03/11/fisher-information/">this blog post</a>.</p>
+<p>Where \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\) is the <strong>fisher information matrix</strong>. For the full derivation of these equations checkout <a href="https://wiseodd.github.io/techblog/2018/03/11/fisher-information/">this blog post</a>.</p>
 
 <p>And so using these equations, we get:</p>
 
@@ -334,32 +339,33 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 
 \[\begin{align*}
 \theta^* &amp;= \theta^{(k)} - \lambda^{-1}\text{F}^{-1}\nabla L(\theta^k) \\
-&amp;= \theta^{(k)} - \lambda^{-1}\tilde{\nabla} L(\theta^k) \\
 \end{align*}\]
 
-<p>Where \(\tilde{\nabla} L(\theta^{(k)})\) is called the <strong>natural gradient</strong>. And this update rule is called <strong>natural gradient descent</strong>. Fantastic!</p>
+<p>This update rule is called <strong>natural gradient descent</strong>. Fantastic!</p>
 
 <p>Now you’re probably thinking:</p>
 
 <blockquote>
-  <p>“Indeed, this is truly fantastic, we now know how to constrain distributions across iterations using \(D_{KL}\) but how do we apply it to neural networks with weights \(w\)??”</p>
+  <p>“Indeed, this is fantastic, we now know how to constrain distributions across iterations using \(D_{KL}\) but how do we apply it to neural networks with weights \(w\)??”</p>
 </blockquote>
 
-<p>Patience young padawan, we shall discover this in the following section</p>
+<p>Excellent question, lets check it out in the next section</p>
 
 <h1 id="natural-gradient-descent-for-neural-nets">Natural Gradient Descent for Neural Nets</h1>
 
-<p>Though our weights \(w\) aren’t a distribution, usually, our model outputs a distribution \(r( \cdot \vert x)\). For example, in classification problems like MNIST our model’s outputs a probability distribution over the digits 1 - 10.</p>
+<p>Though our weights \(w\) aren’t a distribution, usually, our model outputs a distribution \(r( \cdot \vert x)\). For example, in classification problems like MNIST our model’s outputs a probability distribution over the digits 1 - 10 (\(p( y \vert x)\)).</p>
 
-<p>The idea is that even though we can’t constrain our weights across iterations with KL-D, we can use KL-D to constrain the difference between our output distributions across iterations which is likely to do something similar.</p>
+<p>The idea is that even though we can’t constrain our weights across iterations with \(D_{KL}\), we can use \(D_{KL}\) to constrain the difference between our output distributions across iterations which is likely to do something similar.</p>
 
-<p>More formally, we can define our output distribution as \(z = f(w, x)\) and set \(\rho = D_{KL}\). Then we can define \(\rho_{\text{pull}}\) as the following:</p>
+<p>To do this, we need to use a trick. Specifically, we need to decompose \(\rho\) into two parts:</p>
+<ol>
+  <li>Network forward pass: \(z = f(w, x)\) where \(z\) is a probability distribution</li>
+  <li>Distribution Distance: \(\rho(z_0, z_1) = D_{KL}(z_0, z_1)\) computation for some $z_0$ and $z_1$</li>
+</ol>
 
-\[\rho_{\text{pull}}(w, w') = \mathbb{E}_{x}[f_x * \rho(w, w')] = \mathbb{E}[\rho(f(w, x), f(w', x))]\]
+<p>Then we can define the full \(\rho_{\text{pull}}\) as the composition of the two parts:</p>
 
-<p>Where the \(f_x*\rho\) operator is called a pullback operation:</p>
-
-\[f*g(x_1, ..., x_k) = g(f(x_1), f(x_2), ..., f(x_k))\]
+\[\rho_{\text{pull}} = \rho(f(w^{(k)}, x), f(w^{(k+1)}, x))\]
 
 <p>Now similar to the previous sections, lets approximate \(\rho_{\text{pull}}\) with a second-order Taylor expansion. Again, we need to find \(\rho_{\text{pull}}(w, w')\vert_{w = w'}\), \(\nabla \rho_{\text{pull}}(w, w')\vert_{w = w'}\), and \(\nabla_{\text{pull}}^2 \rho(w, w')\vert_{w = w'}\):</p>
 
@@ -368,29 +374,54 @@ D_{KL}[p(x \vert \theta) \| p(x \vert \theta')] &amp;= \sum_x p(x|\theta) [\log 
 &amp;= 0 \\
 \end{align*}\]
 
+<p>…</p>
+
 \[\begin{align*}
 \nabla_w \rho_{\text{pull}}(w, w')\vert_{w = w'} &amp;= \nabla_w\rho(f(w, x), f(w', x)) \\
 &amp;= \text{J}_{zx}^\intercal \underbrace{\nabla_z\rho(z, z')|_{z=z'}}_{=0} \\ 
 &amp;= 0 \\
 \end{align*}\]
 
-<p>The last line occurs bc of the chain rule and since we know for \(\nabla \rho = \nabla D_{KL} = 0\). Notice how pullback functions (\(\rho_{\text{pull}}\)) make the gradients simple to compute :).</p>
+<p>We derive the last line by using the chain rule and the fact that \(\nabla \rho = \nabla D_{KL} = 0\) (derived in the previous section).</p>
 
-<p>Using this decomposition it can be shown that \(\nabla^2 \rho_{\text{pull}}\) (in general any hessian/second derivative matrix) can be decomposed into the following (check out <a href="https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/">this</a> for a full derivation):</p>
+<p>Now to show the power of the two-part decompositon we used…</p>
+
+<p>Using the two-part decomposition it can be shown that \(\nabla^2 \rho_{\text{pull}}\) (in general any hessian/second derivative matrix) can be represented as the following (check out <a href="https://andrew.gibiansky.com/blog/machine-learning/gauss-newton-matrix/">this</a> for a full derivation):</p>
+
+\[\begin{align*}
+\nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \sum_a \dfrac{d \rho}{dz_a} \nabla^2_w [f(x, w)]_a\\
+\end{align*}\]
+
+<p>Now lets better understand what this representation means. This shows that $\nabla_w^2 \rho_{\text{pull}}(w, w’)$ can be represented as two parts:</p>
+
+\[\text{J}_{zw}^\intercal H_z \text{J}_{zw}\]
+
+<ul>
+  <li>First derivatives of the network (i.e, $\text{J}_{zw}$ the Jacobian of $\dfrac{dz}{dw}$) and second derivatives of $\rho$ (i.e, $H_z$)</li>
+</ul>
+
+\[\sum_a \dfrac{d \rho}{dz_a} \nabla^2_w [f(x, w)]_a\]
+
+<ul>
+  <li>Second derivaties of the network (i.e $\nabla^2_w [f(x, w)]_a$) and first derivatives of $\rho$ (i.e, $\dfrac{d \rho}{dz_a}$)</li>
+</ul>
+
+<p>Usually computing and storing second derivaties of the network is very expensive (for a network with $n$ parameters the second derivative matrix will be of size $n \times n$ where $n$ is usually in millions for neural networks). Luckily though, since we know \(\nabla \rho = \nabla D_{KL} = 0\) we drop the second derivatives:</p>
 
 \[\begin{align*}
 \nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw} + \underbrace{\sum_a \overbrace{\dfrac{d \rho}{dz_a}}^{=0} \nabla^2_w [f(x, w)]_a}_{=0} \\
 &amp;= \text{J}_{zw}^\intercal H_z \text{J}_{zw}
 \end{align*}\]
 
-<p>Where \(\text{J}_{zw}\) is the Jacobian matrix for \(\dfrac{dz}{dw}\) and \(H_z\) is the hessian matrix for \(z\). Again, the second term disappears since we know \(\nabla \rho = \nabla D_{KL} = 0\).</p>
+<p><em>Note:</em> When \(\nabla \rho \neq 0\) we can approximate \(\nabla_w^2 \rho_{\text{pull}}\) by just setting \(\nabla \rho = 0\), using \(\text{J}_{zw}^\intercal H_z \text{J}_{zw}\) and hope for the best lol. This formulation is called the <strong>Guass-Newton Hessian</strong>. In this case though ($\rho = D_{KL}$), the Guass-Newton Hessian is the exact solution.</p>
 
-<p>For the case of \(D_{KL}\) we know that \(H_z = F_z\) where \(F_z\) is the fisher information matrix. And so using the definition of the fisher matrix (i.e \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\)) we can derive our second-order approximation:</p>
+<p>In the previous section we derived that \(\nabla^2 \rho = \nabla^2 D_{KL} = H_z = F_z\) where \(F_z\) is the fisher information matrix. And so using the definition of the fisher matrix (i.e \(\text{F} = \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \, \nabla \log p(x \vert \theta)^{\text{T}} \right]\)) with our networks output we can derive our second-order approximation:</p>
 
 \[\begin{align*}
-\nabla_w^2 \rho_{\text{pull}}(w, w') = \text{F}_w &amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \text{F}_z \text{J}_{zw}] \\
+\nabla_w^2 \rho_{\text{pull}}(w, w') &amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \text{F}_z \text{J}_{zw}] \\
 &amp;= \mathbb{E_{x \sim p_{\text{data}}}} [\text{J}_{zw}^\intercal \mathbb{E}_{t \sim r(\cdot \vert x)} [\nabla_z \log r(t \vert x) \nabla_z \log r(t \vert x) ^ \intercal] \text{J}_{zw}] \\
 &amp;= \mathbb{E_{x \sim p_{\text{data}}, {t \sim r(\cdot \vert x)}}} [\nabla_w \log r(t \vert x) \nabla_w \log r(t \vert x) ^ \intercal] \\
+&amp;= \text{F}_w
 \end{align*}\]
 
 <p>Notice \({t \sim r(\cdot \vert x)}\) samples \(t\) from the <em>model’s distribution</em> which is the <strong>true fisher information matrix</strong>.</p>
@@ -413,7 +444,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 \end{align*}\]
 
-<p>We now see that this results in the <strong>natural gradient method</strong> :o</p>
+<p>We now see that this results in the <strong>natural gradient method</strong> for neural networks :D</p>
 
 <h1 id="computing-the-natural-gradient-in-jax">Computing the Natural Gradient in JAX</h1>
 
@@ -425,7 +456,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <h2 id="code">Code</h2>
 
-<p>First, we define a small MLP model</p>
+<p>First, we define a small MLP model:</p>
 
 <script src="https://gist.github.com/gebob19/d0b4e9ef147545b3f5762461c4b2a6fe.js"></script>
 
@@ -437,7 +468,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <script src="https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js"></script>
 
-<p>Single example -&gt; batch data with a single line! So clean! :D</p>
+<p>Single example -&gt; batch data with a single line? yes please</p>
 
 <p>To get a general feel for JAX, we first define a normal gradient step function (we use <code class="language-plaintext highlighter-rouge">@jit</code> to compile the function which makes it run fast)</p>
 
@@ -445,7 +476,9 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p>We can then define a natural gradient step using the <strong>empirical fisher matrix</strong>:</p>
 
-<p><strong>Recall</strong>: Our update rule is: \(\theta_{t+1} = \theta_t - \eta F^{-1} \nabla L\). So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the <a href="https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf">conjugate gradient method</a>.</p>
+<p><em>Note:</em> To compute \(\text{F}_w\) we directly compute and store the exact Fisher for a small network, however this can be further improved in terms of speed and memory storage. I may write about how to do this in another post.</p>
+
+<p><strong>Recall</strong>: Our update rule is: \(\theta_{t+1} = \theta_t - \eta F^{-1} \nabla L\). So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the <a href="https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf">conjugate gradient method</a>. I won’t go into detail here, but deciding how to solve for \(F^{-1} \nabla L\) is a post on its own.</p>
 
 <p><strong>Aside</strong>: There’s a lot of really cool resources to help understand the conjugate gradient method <a href="https://twitter.com/brennangebotys/status/1410231825868509185?s=20">like this one</a>.</p>
 
@@ -592,7 +625,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p>Let me know – tweet, email, or dm me! :D</p>
 
-<h2 id="further-reading-and-things">Further Reading and Things</h2>
+<h2 id="further-reading-and-brief-other-things">Further Reading and Brief Other Things</h2>
 
 <h3 id="problems-with-inversion---conjugate-gradient--preconditioners">Problems with Inversion - Conjugate Gradient &amp; Preconditioners</h3>
 
@@ -618,7 +651,7 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p><a href="https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf">https://www.cs.utoronto.ca/~jmartens/docs/HF_book_chapter.pdf</a></p>
 
-<p><a href="http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf">http://www.cs.toronto.edu/~jmartens/docs/thesis_phd_martens.pdf</a></p>
+<p><a href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/">https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/</a></p>
 
 
 </article>
