@@ -470,11 +470,139 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 <p>To do so, we’ll write the code in <strong>JAX</strong> (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset.</p>
 
-<p>If you’re new to JAX there’s a lot of great resources out there to learn from!</p>
+<p>If you’re new to JAX there’s a lot of great resources out there to learn from! Specifically, make sure you’re comfortable with <code class="language-plaintext highlighter-rouge">jax.jvp</code> and <code class="language-plaintext highlighter-rouge">jax.vjp</code> to understand the code:</p>
 
-<h2 id="implementation">Implementation</h2>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">jax.jvp</code>: <code class="language-plaintext highlighter-rouge">lambda v:</code> \(J v\)
+    <ul>
+      <li>Short Explanation: Jacobian vector product using <em>reverse/backward-accumulation</em> (<code class="language-plaintext highlighter-rouge">v.shape</code> = output size)</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">jax.vjp</code>: <code class="language-plaintext highlighter-rouge">lambda v:</code> \(v^T J\)
+    <ul>
+      <li>Short Explanation: Jacobian vector product using <em>forward-accumulation</em> (<code class="language-plaintext highlighter-rouge">v.shape</code> = input size)</li>
+    </ul>
+  </li>
+</ul>
 
-<p>[… coming soon … ]</p>
+<h2 id="implementation-common-gotchas-and-programming-tricks">Implementation: Common Gotchas and Programming Tricks</h2>
+
+<p>To implement the natural gradient here are a few pseudosteps:</p>
+<ol>
+  <li>Compute gradients \(\nabla L(w)\)</li>
+  <li>Construct the fisher information matrix \(\text{F}_w\)</li>
+  <li>Compute \(\text{F}_w^{-1} \nabla L(w)\)</li>
+  <li>Take a step: \(w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})\)</li>
+</ol>
+
+<p>Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section.</p>
+
+<h2 id="2-construct-the-fisher-textf_w">2. Construct the Fisher \(\text{F}_w\)</h2>
+
+<p>A straightforward implementation would construct the Fisher matrix explicitly like so:</p>
+
+<ol>
+  <li>Compute the gradients \(\nabla L(w^{(k)})\) using autodiff and flatten/reshape them into a $n \times 1$ matrix</li>
+  <li>Compute the fisher matrix \(F_w = \nabla L \nabla L^T\) as a $n \times n$ matrix</li>
+</ol>
+
+<p>However, when \(n\) is large, we can’t compute the Fisher matrix explicitly since we have limited computer memory.</p>
+
+<p><em>For example:</em> A two layer MLP (with layers: 128 hidden and 10 output classes) for MNIST images (\(28 \times 28\) images -&gt; \(784\) flattened image) consists of two weight matricies &amp; some biases. Considering only the weight matricies: one with size \(754 \times 128\) and another \(128 \times 10\). This means the total number of parameters (\(n\)) is 96K (\(754 \times 128\)) + 1.2K (\(128 \times 10\)) = 97K. So constructing our fisher will be a \(97,000 \times 97,000\) matrix which is <strong>over 9 billion</strong> values. Try computing this and you’ll crash your macbook lol.</p>
+
+<p>There are multiple ways around this problem but the one we will cover is <em>matrix-vector products</em> (MVP). We’ll see why soon.</p>
+
+<h2 id="3-computing-textf_w-1-nabla-lw">3. Computing \(\text{F}_w^{-1} \nabla L(w)\)</h2>
+
+<p>Before we talk about matrix-vector products it makes sense to talk about how to compute \(\text{F}_w^{-1} \nabla L(w)\). To do so, we can use the <strong>conjugate gradient method</strong>. I won’t go in-depth on the algorithm (I left some resources at the end of the post) but all you need to know is that the method can <em>approximately</em> solve the following:</p>
+
+\[\underset{x}{\text{argmin}} \; A x = b\]
+
+<p>For some matrices A, x, and b. For our problem, we can change the notation to:</p>
+
+\[\underset{x}{\text{argmin}} \; F_w x = \nabla L\]
+
+<p>where \(\underset{x}{\text{argmin}} = F_w^{-1} \nabla L\), which is what we want. The best part is that the algorithm doesn’t require the full matrix \(F_w\) and <strong>only needs a way to compute the matrix-vector product \(F_w x\)</strong>. Fortunately, there are ways to compute matrix-vector products without explicitly having the full matrix in memory.</p>
+
+<p><em>Exercise</em>: What’s the simplest way to compute an MVP without explicitly representing the full matrix in memory? See Conjugate Gradient resources for the answer.</p>
+
+<h2 id="2--3-mvps-and-conjugate-gradient">2. + 3.: MVPs and Conjugate Gradient</h2>
+
+<p>Updating the pseudosteps we get:</p>
+
+<ol>
+  <li>Compute gradients \(\nabla L(w)\)</li>
+  <li>Define the MVP: <code class="language-plaintext highlighter-rouge">lambda v:</code> \(\text{F}_w v\)</li>
+  <li>Compute \(\text{F}_w^{-1} \nabla L(w)\) using the conjugate gradient method and the MVP</li>
+  <li>Take a step: \(w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})\)</li>
+</ol>
+
+<h3 id="jax-setup">Jax: Setup</h3>
+
+<p>First, we define a small MLP model:</p>
+
+<script src="https://gist.github.com/gebob19/d0b4e9ef147545b3f5762461c4b2a6fe.js"></script>
+
+<p>Then we define a few loss functions</p>
+
+<script src="https://gist.github.com/gebob19/e288e7a0646d53ee732b6ab9c251b705.js"></script>
+
+<p>Next, we make the losses work for batch input using <code class="language-plaintext highlighter-rouge">vmap</code></p>
+
+<script src="https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js"></script>
+
+<p>Single example -&gt; batch data with a single line? yes, please</p>
+
+<p>To get a general feel for JAX, we first define a normal gradient step function (we use <code class="language-plaintext highlighter-rouge">@jit</code> to compile the function which makes it run fast)</p>
+
+<script src="https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js"></script>
+
+<h3 id="jax-2-define-the-mvp">Jax: 2. Define the MVP</h3>
+
+<script src="https://gist.github.com/gebob19/aa51155c5db126f6b24626f8c545ad1e.js"></script>
+
+<h3 id="jax-empirical-fisher">Jax: Empirical Fisher</h3>
+
+<script src="https://gist.github.com/gebob19/3f30395fb4eef70ea0acfb47c985872b.js"></script>
+
+<p><em>Note:</em> Although we should be using the gradients from <code class="language-plaintext highlighter-rouge">mean_log_likelihood</code>, we can use the <code class="language-plaintext highlighter-rouge">grads</code> from the <code class="language-plaintext highlighter-rouge">mean_cross_entropy</code> to shave off an extra forward and backward pass. <em>Exercise:</em> Why does this work? (Hint: does <code class="language-plaintext highlighter-rouge">grad2fisher</code> change if we use <code class="language-plaintext highlighter-rouge">nll</code> vs <code class="language-plaintext highlighter-rouge">ll</code>?)</p>
+
+<h3 id="jax-natural-fisher">Jax: Natural Fisher</h3>
+
+<script src="https://gist.github.com/gebob19/7707f301f30acc3ec9379295c6fb90cb.js"></script>
+
+<h3 id="speed-test">Speed Test</h3>
+
+<script src="https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js"></script>
+
+<h2 id="results">Results</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optim Method</th>
+      <th>Test Accuracy (%)</th>
+      <th>Total Runtime (seconds)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Vanilla-SGD</td>
+      <td>95.99</td>
+      <td><strong>53</strong></td>
+    </tr>
+    <tr>
+      <td>Natural Gradient (Empirical)</td>
+      <td><strong>96.25</strong></td>
+      <td>58</td>
+    </tr>
+    <tr>
+      <td>Natural Gradient</td>
+      <td>95.82</td>
+      <td>75</td>
+    </tr>
+  </tbody>
+</table>
 
 <h2 id="further-reading-and-brief-other-things">Further Reading and Brief Other Things</h2>
 
@@ -492,11 +620,15 @@ w^* &amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png" alt="test-acc" class="center" />
 </div>
 
-<p>Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a dampened update.</p>
+<p>Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a <strong>dampened update</strong>:</p>
+
+<script src="https://gist.github.com/gebob19/1055b7332847086b65b7e4c66459f538.js"></script>
 
 <p>Soln2: Use Trust Region Optimization</p>
 
 <h3 id="more-resources">More Resources</h3>
+
+<p><a href="https://twitter.com/brennangebotys/status/1410231825868509185?s=20">Cool conjugate gradient resource</a>.</p>
 
 <p><a href="https://www.youtube.com/watch?v=qAVZd6dHxPA">2nd-order Optimization for Neural Network Training from jmartens</a></p>
 

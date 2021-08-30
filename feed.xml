@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-29T16:23:45-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-30T09:04:40-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:&lt;/p&gt;
 
@@ -360,11 +360,139 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 &lt;p&gt;To do so, we’ll write the code in &lt;strong&gt;JAX&lt;/strong&gt; (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset.&lt;/p&gt;
 
-&lt;p&gt;If you’re new to JAX there’s a lot of great resources out there to learn from!&lt;/p&gt;
+&lt;p&gt;If you’re new to JAX there’s a lot of great resources out there to learn from! Specifically, make sure you’re comfortable with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jax.jvp&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jax.vjp&lt;/code&gt; to understand the code:&lt;/p&gt;
 
-&lt;h2 id=&quot;implementation&quot;&gt;Implementation&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jax.jvp&lt;/code&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lambda v:&lt;/code&gt; \(J v\)
+    &lt;ul&gt;
+      &lt;li&gt;Short Explanation: Jacobian vector product using &lt;em&gt;reverse/backward-accumulation&lt;/em&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;v.shape&lt;/code&gt; = output size)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jax.vjp&lt;/code&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lambda v:&lt;/code&gt; \(v^T J\)
+    &lt;ul&gt;
+      &lt;li&gt;Short Explanation: Jacobian vector product using &lt;em&gt;forward-accumulation&lt;/em&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;v.shape&lt;/code&gt; = input size)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;[… coming soon … ]&lt;/p&gt;
+&lt;h2 id=&quot;implementation-common-gotchas-and-programming-tricks&quot;&gt;Implementation: Common Gotchas and Programming Tricks&lt;/h2&gt;
+
+&lt;p&gt;To implement the natural gradient here are a few pseudosteps:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Compute gradients \(\nabla L(w)\)&lt;/li&gt;
+  &lt;li&gt;Construct the fisher information matrix \(\text{F}_w\)&lt;/li&gt;
+  &lt;li&gt;Compute \(\text{F}_w^{-1} \nabla L(w)\)&lt;/li&gt;
+  &lt;li&gt;Take a step: \(w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})\)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section.&lt;/p&gt;
+
+&lt;h2 id=&quot;2-construct-the-fisher-textf_w&quot;&gt;2. Construct the Fisher \(\text{F}_w\)&lt;/h2&gt;
+
+&lt;p&gt;A straightforward implementation would construct the Fisher matrix explicitly like so:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Compute the gradients \(\nabla L(w^{(k)})\) using autodiff and flatten/reshape them into a $n \times 1$ matrix&lt;/li&gt;
+  &lt;li&gt;Compute the fisher matrix \(F_w = \nabla L \nabla L^T\) as a $n \times n$ matrix&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;However, when \(n\) is large, we can’t compute the Fisher matrix explicitly since we have limited computer memory.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;For example:&lt;/em&gt; A two layer MLP (with layers: 128 hidden and 10 output classes) for MNIST images (\(28 \times 28\) images -&amp;gt; \(784\) flattened image) consists of two weight matricies &amp;amp; some biases. Considering only the weight matricies: one with size \(754 \times 128\) and another \(128 \times 10\). This means the total number of parameters (\(n\)) is 96K (\(754 \times 128\)) + 1.2K (\(128 \times 10\)) = 97K. So constructing our fisher will be a \(97,000 \times 97,000\) matrix which is &lt;strong&gt;over 9 billion&lt;/strong&gt; values. Try computing this and you’ll crash your macbook lol.&lt;/p&gt;
+
+&lt;p&gt;There are multiple ways around this problem but the one we will cover is &lt;em&gt;matrix-vector products&lt;/em&gt; (MVP). We’ll see why soon.&lt;/p&gt;
+
+&lt;h2 id=&quot;3-computing-textf_w-1-nabla-lw&quot;&gt;3. Computing \(\text{F}_w^{-1} \nabla L(w)\)&lt;/h2&gt;
+
+&lt;p&gt;Before we talk about matrix-vector products it makes sense to talk about how to compute \(\text{F}_w^{-1} \nabla L(w)\). To do so, we can use the &lt;strong&gt;conjugate gradient method&lt;/strong&gt;. I won’t go in-depth on the algorithm (I left some resources at the end of the post) but all you need to know is that the method can &lt;em&gt;approximately&lt;/em&gt; solve the following:&lt;/p&gt;
+
+\[\underset{x}{\text{argmin}} \; A x = b\]
+
+&lt;p&gt;For some matrices A, x, and b. For our problem, we can change the notation to:&lt;/p&gt;
+
+\[\underset{x}{\text{argmin}} \; F_w x = \nabla L\]
+
+&lt;p&gt;where \(\underset{x}{\text{argmin}} = F_w^{-1} \nabla L\), which is what we want. The best part is that the algorithm doesn’t require the full matrix \(F_w\) and &lt;strong&gt;only needs a way to compute the matrix-vector product \(F_w x\)&lt;/strong&gt;. Fortunately, there are ways to compute matrix-vector products without explicitly having the full matrix in memory.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Exercise&lt;/em&gt;: What’s the simplest way to compute an MVP without explicitly representing the full matrix in memory? See Conjugate Gradient resources for the answer.&lt;/p&gt;
+
+&lt;h2 id=&quot;2--3-mvps-and-conjugate-gradient&quot;&gt;2. + 3.: MVPs and Conjugate Gradient&lt;/h2&gt;
+
+&lt;p&gt;Updating the pseudosteps we get:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Compute gradients \(\nabla L(w)\)&lt;/li&gt;
+  &lt;li&gt;Define the MVP: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lambda v:&lt;/code&gt; \(\text{F}_w v\)&lt;/li&gt;
+  &lt;li&gt;Compute \(\text{F}_w^{-1} \nabla L(w)\) using the conjugate gradient method and the MVP&lt;/li&gt;
+  &lt;li&gt;Take a step: \(w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})\)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;jax-setup&quot;&gt;Jax: Setup&lt;/h3&gt;
+
+&lt;p&gt;First, we define a small MLP model:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/d0b4e9ef147545b3f5762461c4b2a6fe.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Then we define a few loss functions&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/e288e7a0646d53ee732b6ab9c251b705.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Next, we make the losses work for batch input using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vmap&lt;/code&gt;&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/c2ad9cf658c9fb4a2377614c7dbf8a80.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;Single example -&amp;gt; batch data with a single line? yes, please&lt;/p&gt;
+
+&lt;p&gt;To get a general feel for JAX, we first define a normal gradient step function (we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@jit&lt;/code&gt; to compile the function which makes it run fast)&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js&quot;&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;jax-2-define-the-mvp&quot;&gt;Jax: 2. Define the MVP&lt;/h3&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/aa51155c5db126f6b24626f8c545ad1e.js&quot;&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;jax-empirical-fisher&quot;&gt;Jax: Empirical Fisher&lt;/h3&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/3f30395fb4eef70ea0acfb47c985872b.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; Although we should be using the gradients from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_log_likelihood&lt;/code&gt;, we can use the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grads&lt;/code&gt; from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_cross_entropy&lt;/code&gt; to shave off an extra forward and backward pass. &lt;em&gt;Exercise:&lt;/em&gt; Why does this work? (Hint: does &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grad2fisher&lt;/code&gt; change if we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nll&lt;/code&gt; vs &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ll&lt;/code&gt;?)&lt;/p&gt;
+
+&lt;h3 id=&quot;jax-natural-fisher&quot;&gt;Jax: Natural Fisher&lt;/h3&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/7707f301f30acc3ec9379295c6fb90cb.js&quot;&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;speed-test&quot;&gt;Speed Test&lt;/h3&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;results&quot;&gt;Results&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Optim Method&lt;/th&gt;
+      &lt;th&gt;Test Accuracy (%)&lt;/th&gt;
+      &lt;th&gt;Total Runtime (seconds)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Vanilla-SGD&lt;/td&gt;
+      &lt;td&gt;95.99&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;53&lt;/strong&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Natural Gradient (Empirical)&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;96.25&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;58&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Natural Gradient&lt;/td&gt;
+      &lt;td&gt;95.82&lt;/td&gt;
+      &lt;td&gt;75&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h2 id=&quot;further-reading-and-brief-other-things&quot;&gt;Further Reading and Brief Other Things&lt;/h2&gt;
 
@@ -382,11 +510,15 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 &lt;img src=&quot;https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png&quot; alt=&quot;test-acc&quot; class=&quot;center&quot; /&gt;
 &lt;/div&gt;
 
-&lt;p&gt;Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a dampened update.&lt;/p&gt;
+&lt;p&gt;Soln: We can add another term \(\| w^{(k+1)} - w^{(k)}\|^2\) to our loss to make sure we don’t take large steps where our approximation is inaccurate. This leads to a &lt;strong&gt;dampened update&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/1055b7332847086b65b7e4c66459f538.js&quot;&gt;&lt;/script&gt;
 
 &lt;p&gt;Soln2: Use Trust Region Optimization&lt;/p&gt;
 
 &lt;h3 id=&quot;more-resources&quot;&gt;More Resources&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://twitter.com/brennangebotys/status/1410231825868509185?s=20&quot;&gt;Cool conjugate gradient resource&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=qAVZd6dHxPA&quot;&gt;2nd-order Optimization for Neural Network Training from jmartens&lt;/a&gt;&lt;/p&gt;
 
