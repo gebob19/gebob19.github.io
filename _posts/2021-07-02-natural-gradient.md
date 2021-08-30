@@ -368,11 +368,62 @@ We now see that this results in the **natural gradient method** for neural netwo
 
 The theory is amazing but it doesn't mean much if we can't use it. So, to finish it off we're gonna code it! 
 
-To do so, we'll write the code in **JAX** (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset (not the ideal scenario for natural gradient descent to shine but its good to show how everything works).
+To do so, we'll write the code in **JAX** (what all the cool kids are using nowadays) and train a small MLP model on the MNIST dataset.
 
-If you're new to JAX there's a lot of great resources out there to learn from! What do I like about it you ask? Coming from a Computer Science background, I love the functional programming aspect of it which lets you write really clean code :D  
+If you're new to JAX there's a lot of great resources out there to learn from! Specifically, make sure you're comfortable with `jax.jvp` and `jax.vjp` to understand the code:
 
-## Code
+- `jax.jvp`: `lambda v:` $$J v$$
+    - Short Explanation: Jacobian vector product using *reverse/backward-accumulation* (`v.shape` = output size)
+- `jax.vjp`: `lambda v:` $$v^T J$$
+    - Short Explanation: Jacobian vector product using *forward-accumulation* (`v.shape` = input size)
+
+## Implementation: Common Gotchas and Programming Tricks
+
+To implement the natural gradient here are a few pseudosteps:
+1. Compute gradients $$\nabla L(w)$$ 
+2. Construct the fisher information matrix $$\text{F}_w$$ 
+3. Compute $$\text{F}_w^{-1} \nabla L(w)$$ 
+4. Take a step: $$w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})$$  
+
+Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section. 
+
+## 2. Construct the Fisher $$\text{F}_w$$
+
+A straightforward implementation would construct the Fisher matrix explicitly like so:
+
+1. Compute the gradients $$\nabla L(w^{(k)})$$ using autodiff and flatten/reshape them into a $n \times 1$ matrix
+2. Compute the fisher matrix $$F_w = \nabla L \nabla L^T$$ as a $n \times n$ matrix
+
+However, when $$n$$ is large, we can't compute the Fisher matrix explicitly since we have limited computer memory. 
+
+*For example:* A two layer MLP (with layers: 128 hidden and 10 output classes) for MNIST images ($$28 \times 28$$ images -> $$784$$ flattened image) consists of two weight matricies & some biases. Considering only the weight matricies: one with size $$754 \times 128$$ and another $$128 \times 10$$. This means the total number of parameters ($$n$$) is 96K ($$754 \times 128$$) + 1.2K ($$128 \times 10$$) = 97K. So constructing our fisher will be a $$97,000 \times 97,000$$ matrix which is **over 9 billion** values. Try computing this and you'll crash your macbook lol. 
+
+There are multiple ways around this problem but the one we will cover is *matrix-vector products* (MVP). We'll see why soon. 
+
+## 3. Computing $$\text{F}_w^{-1} \nabla L(w)$$
+
+Before we talk about matrix-vector products it makes sense to talk about how to compute $$\text{F}_w^{-1} \nabla L(w)$$. To do so, we can use the **conjugate gradient method**. I won't go in-depth on the algorithm (I left some resources at the end of the post) but all you need to know is that the method can *approximately* solve the following: 
+
+$$ \underset{x}{\text{argmin}} \; A x = b $$
+
+For some matrices A, x, and b. For our problem, we can change the notation to:
+
+$$ \underset{x}{\text{argmin}} \; F_w x = \nabla L $$
+
+where $$\underset{x}{\text{argmin}} = F_w^{-1} \nabla L$$, which is what we want. The best part is that the algorithm doesn't require the full matrix $$F_w$$ and **only needs a way to compute the matrix-vector product $$F_w x$$**. Fortunately, there are ways to compute matrix-vector products without explicitly having the full matrix in memory.
+
+*Exercise*: What's the simplest way to compute an MVP without explicitly representing the full matrix in memory? See Conjugate Gradient resources for the answer.
+
+## 2. + 3.: MVPs and Conjugate Gradient 
+
+Updating the pseudosteps we get: 
+
+1. Compute gradients $$\nabla L(w)$$ 
+2. Define the MVP: `lambda v:` $$\text{F}_w v$$ 
+3. Compute $$\text{F}_w^{-1} \nabla L(w)$$ using the conjugate gradient method and the MVP
+4. Take a step: $$w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})$$  
+
+### Jax: Setup 
 
 First, we define a small MLP model: 
 
@@ -392,110 +443,32 @@ To get a general feel for JAX, we first define a normal gradient step function (
 
 <script src="https://gist.github.com/gebob19/d519682cfe29a73f71cdecfc3eb2566b.js"></script>
 
-We can then define a natural gradient step using the **empirical fisher matrix**:
+### Jax: 2. Define the MVP 
 
-*Note:* To compute $$\text{F}_w$$ we directly compute and store the exact Fisher for a small network, however, this can be further improved in terms of speed and memory storage. I may write about how to do this in another post.  
+<script src="https://gist.github.com/gebob19/aa51155c5db126f6b24626f8c545ad1e.js"></script>
 
-**Recall**: Our update rule is: $$ \theta_{t+1} = \theta_t - \eta F^{-1} \nabla L$$. So, to compute $F^{-1} \nabla L$, we solve the linear system $F x = \nabla L$ using the [conjugate gradient method](https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf). I won't go into detail here, but deciding how to solve for $$F^{-1} \nabla L$$ is a post on its own. 
+### Jax: Empirical Fisher 
 
-**Aside**: There's a lot of really cool resources to help understand the conjugate gradient method [like this one](https://twitter.com/brennangebotys/status/1410231825868509185?s=20).
-
-<script src="https://gist.github.com/gebob19/2ecb5df93f8f2e7ebb58c0823084bfa6.js"></script>
+<script src="https://gist.github.com/gebob19/3f30395fb4eef70ea0acfb47c985872b.js"></script>
 
 *Note:* Although we should be using the gradients from `mean_log_likelihood`, we can use the `grads` from the `mean_cross_entropy` to shave off an extra forward and backward pass. *Exercise:* Why does this work? (Hint: does `grad2fisher` change if we use `nll` vs `ll`?)
 
-Finally, we can define the natural gradient step by sampling from the model's predictions: 
+### Jax: Natural Fisher 
 
-*Note:* To evaluate $$\mathbb{E_{t \sim r(\cdot \vert x)}}[...]$$ we use Monte Carlo estimation and sample multiple times from our model distribution which we do using `n_samples`.
+<script src="https://gist.github.com/gebob19/7707f301f30acc3ec9379295c6fb90cb.js"></script>
 
-<script src="https://gist.github.com/gebob19/ba7d73eb16c8331cc75a7b5dd49e7ab9.js"></script>
-
-We can also check out the difference in speed (run on my laptop's CPUs) with a batch size of 2: 
+### Speed Test
 
 <script src="https://gist.github.com/gebob19/3f55c30c8a930b2d4451e1e8baf87d49.js"></script>
 
-`995 µs ± 172 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # SGD` 
-
-`6.96 ms ± 648 µs per loop (mean ± std. dev. of 7 runs, 1 loop each) # Emp NGD (6x slower SGD)`
-
-`1.33 s ± 21.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 1 sample (1000x slower SGD)`
-
-`3.68 s ± 476 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) # NGD 5 sample (3000x slower SGD)`
-
-Last but not least we define some boilerplate training code and compare the runs: 
-
-<script src="https://gist.github.com/gebob19/7200ee0bfc99274b817896cbade5dd8c.js"></script>
-
-
-Tada! Done! The full code can be found [HERE](https://github.com/gebob19/naturalgradient).
-
 ## Results 
 
-**Note:** In the code for the natural gradient (Natural Fisher (1/5 Sample)), the gradients blow up (to values up to `1e+20`) to values too big to view on tensorboard (still trainable but results in error lol). I'm not exactly sure why this is yet. But, to get around this, I used gradient clipping (clipped to have values in [-10, 10]). 
+| Optim Method    | Test Accuracy (%) | Total Runtime (seconds) |
+|-----------------|--------------|--------------|
+| Vanilla-SGD     | 95.99        | **53** |
+| Natural Gradient (Empirical) | **96.25**        | 58 |
+| Natural Gradient | 95.82        | 75 |
 
-***
-
-Here are the tensorboard results: 
-
-### Test Accuracy
-
-| Optim Method    | Test Accuracy (%) |
-|-----------------|--------------|
-| Vanilla-SGD     | 95.99        |
-| NGrad-(Emp)     | 92.77        |
-| NGrad-(1sample) | 90.06        |
-| NGrad-(5sample) | 89.52        |
-
-### Train Loss
-
-| Optim Method    | Train Loss (CE) | Time   |
-|-----------------|-----------------|--------|
-| Vanilla-SGD     | 0.1637          | 37s    |
-| NGrad-(Emp)     | 0.3141          | 8m 33s |
-| NGrad-(1sample) | 0.3999          | 4m 4s  |
-| NGrad-(5sample) | 0.411           | 4m 9s  |
-
-Because you can't change Tensorboard colors, hopefully this will help: at iteration 100 the methods ordered by smallest to largest loss value is: 
-- Vanilla-SGD
-- NGrad-(5sample)
-- NGrad-(1sample)
-- NGrad-(Emp)
-
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/loss.png" alt="train-loss" class="center"/>
-</div>
-
-### Weights & Gradients
-
-The diagrams are in the following order: 
-
-SGD, Empirical Fisher, Natural Fisher (1 Sample), and Natural Fisher (5 Sample).
-
-*Note:* Each diagram uses its scale. 
-
-#### Linear 0
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w0.png" class="center"/>
-</div>
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b0.png" class="center"/>
-</div>
-
-#### Linear 1
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/w2.png" class="center"/>
-</div>
-<div align="center" width="500" height="100">
-<img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/b2.png" class="center"/>
-</div>
-
-Pretty cool stuff!! :D 
-
-Unfortunately in this scenario, Natural Gradient Descent didn't outperform SGD, but naturally (pun intended) I'm sure there are cases where it does (different learning rates, clipping values, datasets, etc.). 
-
-Did I do anything wrong? Anything to add? What did you like or dislike? 
-
-Let me know -- tweet, email, or dm me! :D 
 
 ## Further Reading and Brief Other Things 
 
@@ -513,11 +486,15 @@ Problem: The optimal of the Taylor-Approx may not be the actual optimal. When th
 <img src="https://raw.githubusercontent.com/gebob19/gebob19.github.io/source/assets/natural_grad/linear_approx_fail.png" alt="test-acc" class="center"/>
 </div>
 
-Soln: We can add another term $$\| w^{(k+1)} - w^{(k)}\|^2$$ to our loss to make sure we don't take large steps where our approximation is inaccurate. This leads to a dampened update.
+Soln: We can add another term $$\| w^{(k+1)} - w^{(k)}\|^2$$ to our loss to make sure we don't take large steps where our approximation is inaccurate. This leads to a **dampened update**: 
+
+<script src="https://gist.github.com/gebob19/1055b7332847086b65b7e4c66459f538.js"></script>
 
 Soln2: Use Trust Region Optimization 
 
 ### More Resources
+
+[Cool conjugate gradient resource](https://twitter.com/brennangebotys/status/1410231825868509185?s=20).
 
 [2nd-order Optimization for Neural Network Training from jmartens](https://www.youtube.com/watch?v=qAVZd6dHxPA)
 
