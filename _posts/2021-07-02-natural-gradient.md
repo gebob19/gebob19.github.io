@@ -377,6 +377,8 @@ If you're new to JAX there's a lot of great resources out there to learn from! S
 - `jax.vjp`: `lambda v:` $$v^T J$$
     - Short Explanation: Jacobian vector product using *forward-accumulation* (`v.shape` = input size)
 
+The full code can be found [here](https://github.com/gebob19/naturalgradient).
+
 ## Implementation: Common Gotchas and Programming Tricks
 
 To implement the natural gradient here are a few pseudosteps:
