@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-08-30T11:38:46-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://gebob19.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gebob19.github.io/" rel="alternate" type="text/html" /><updated>2021-09-21T10:12:54-04:00</updated><id>https://gebob19.github.io/feed.xml</id><title type="html">Brennan Gebotys</title><subtitle>Machine Learning, Statistics, and All Things Cool</subtitle><author><name>Brennan Gebotys</name></author><entry><title type="html">Natural Gradient Descent without the Tears</title><link href="https://gebob19.github.io/natural-gradient/" rel="alternate" type="text/html" title="Natural Gradient Descent without the Tears" /><published>2021-07-02T00:00:00-04:00</published><updated>2021-07-02T00:00:00-04:00</updated><id>https://gebob19.github.io/natural-gradient</id><content type="html" xml:base="https://gebob19.github.io/natural-gradient/">&lt;p&gt;&lt;a href=&quot;https://unsplash.com/photos/6-jTZysYY_U&quot;&gt;Photo Link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;To set the scene, suppose we have a model with weights \(w\) and some loss function \(L(w)\) that we want to minimize. Then our objective is to find \(w^*\) where:&lt;/p&gt;
 
@@ -387,7 +387,7 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
   &lt;li&gt;Take a step: \(w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})\)&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section.&lt;/p&gt;
+&lt;p&gt;Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section. The method we’ll use is called &lt;strong&gt;Hessian Free Optimization&lt;/strong&gt; since we never explicitly represent the hessian matrix. However, there are many other methods to solve Step 2 and 3 (which may or may not be covered in an upcoming post…).&lt;/p&gt;
 
 &lt;h2 id=&quot;2-construct-the-fisher-textf_w&quot;&gt;2. Construct the Fisher \(\text{F}_w\)&lt;/h2&gt;
 
@@ -453,11 +453,15 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 &lt;script src=&quot;https://gist.github.com/gebob19/aa51155c5db126f6b24626f8c545ad1e.js&quot;&gt;&lt;/script&gt;
 
+&lt;p&gt;We’ll use the equation above for comparison but we can also compute the Guass-Newton hessian:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/gebob19/e02819d0207e6a189ff86324794a22c7.js&quot;&gt;&lt;/script&gt;
+
 &lt;h3 id=&quot;jax-empirical-fisher&quot;&gt;Jax: Empirical Fisher&lt;/h3&gt;
 
 &lt;script src=&quot;https://gist.github.com/gebob19/3f30395fb4eef70ea0acfb47c985872b.js&quot;&gt;&lt;/script&gt;
 
-&lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; Although we should be using the gradients from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_log_likelihood&lt;/code&gt;, we can use the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grads&lt;/code&gt; from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_cross_entropy&lt;/code&gt; to shave off an extra forward and backward pass. &lt;em&gt;Exercise:&lt;/em&gt; Why does this work? (Hint: does &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grad2fisher&lt;/code&gt; change if we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nll&lt;/code&gt; vs &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ll&lt;/code&gt;?)&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; Although we should be using the gradients from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_log_likelihood&lt;/code&gt;, we can use the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grads&lt;/code&gt; from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_cross_entropy&lt;/code&gt; to shave off an extra forward and backward pass. &lt;em&gt;Exercise:&lt;/em&gt; Why does this work? (Hint: does &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fisher_vp&lt;/code&gt; change if we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nll&lt;/code&gt; vs &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ll&lt;/code&gt;?)&lt;/p&gt;
 
 &lt;h3 id=&quot;jax-natural-fisher&quot;&gt;Jax: Natural Fisher&lt;/h3&gt;
 
@@ -516,7 +520,7 @@ w^* &amp;amp;= w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})   \\
 
 &lt;script src=&quot;https://gist.github.com/gebob19/1055b7332847086b65b7e4c66459f538.js&quot;&gt;&lt;/script&gt;
 
-&lt;p&gt;Soln2: Use Trust Region Optimization&lt;/p&gt;
+&lt;p&gt;Note: This is similar to Trust Region Optimization&lt;/p&gt;
 
 &lt;h3 id=&quot;more-resources&quot;&gt;More Resources&lt;/h3&gt;
 
