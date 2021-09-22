@@ -387,11 +387,11 @@ To implement the natural gradient here are a few pseudosteps:
 3. Compute $$\text{F}_w^{-1} \nabla L(w)$$ 
 4. Take a step: $$w^{(k+1)} = w^{(k)} - \lambda^{-1} \text{F}_w^{-1}\nabla L(w^{(k)})$$  
 
-Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section. 
+Step 1 and 4 are easy; Step 2 and 3 are difficult. We will tackle how to implement steps 2 and 3 in the following section. The method we'll use is called **Hessian Free Optimization** since we never explicitly represent the hessian matrix. However, there are many other methods to solve Step 2 and 3 (which may or may not be covered in an upcoming post...).
 
 ## 2. Construct the Fisher $$\text{F}_w$$
 
-A straightforward implementation would construct the Fisher matrix explicitly like so:
+A straightforward implementation would construct the Fisher matrix explicitly like so: 
 
 1. Compute the gradients $$\nabla L(w^{(k)})$$ using autodiff and flatten/reshape them into a $n \times 1$ matrix
 2. Compute the fisher matrix $$F_w = \nabla L \nabla L^T$$ as a $n \times n$ matrix
@@ -449,11 +449,15 @@ To get a general feel for JAX, we first define a normal gradient step function (
 
 <script src="https://gist.github.com/gebob19/aa51155c5db126f6b24626f8c545ad1e.js"></script>
 
+We'll use the equation above for comparison but we can also compute the Guass-Newton hessian: 
+
+<script src="https://gist.github.com/gebob19/e02819d0207e6a189ff86324794a22c7.js"></script>
+
 ### Jax: Empirical Fisher 
 
 <script src="https://gist.github.com/gebob19/3f30395fb4eef70ea0acfb47c985872b.js"></script>
 
-*Note:* Although we should be using the gradients from `mean_log_likelihood`, we can use the `grads` from the `mean_cross_entropy` to shave off an extra forward and backward pass. *Exercise:* Why does this work? (Hint: does `grad2fisher` change if we use `nll` vs `ll`?)
+*Note:* Although we should be using the gradients from `mean_log_likelihood`, we can use the `grads` from the `mean_cross_entropy` to shave off an extra forward and backward pass. *Exercise:* Why does this work? (Hint: does `fisher_vp` change if we use `nll` vs `ll`?)
 
 ### Jax: Natural Fisher 
 
@@ -492,7 +496,7 @@ Soln: We can add another term $$\| w^{(k+1)} - w^{(k)}\|^2$$ to our loss to make
 
 <script src="https://gist.github.com/gebob19/1055b7332847086b65b7e4c66459f538.js"></script>
 
-Soln2: Use Trust Region Optimization 
+Note: This is similar to Trust Region Optimization 
 
 ### More Resources
 
