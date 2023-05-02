@@ -294,11 +294,11 @@
 
 <p>The log determinant of such a Jacobian Matrix will be</p>
 
-\[\log(\det(\dfrac{df}{d\mathbf{x}})) = \log(\prod_{i=1}^{d-k} \mid\exp[\sigma_i(\mathbf{x}_{1:k})]\mid) \tag{16}\]
+\[\log(\det(\dfrac{df}{d\mathbf{x}})) = \log(\prod_{i=k+1}^{d} \mid\exp[\sigma_i(\mathbf{x}_{1:k})]\mid) \tag{16}\]
 
-\[\log(\mid\det(\dfrac{df}{d\mathbf{x}})\mid) = \sum_{i=1}^{d-k} \log(\exp[\sigma_i(\mathbf{x}_{1:k})]) \tag{17}\]
+\[\log(\mid\det(\dfrac{df}{d\mathbf{x}})\mid) = \sum_{i=k+1}^{d} \log(\exp[\sigma_i(\mathbf{x}_{1:k})]) \tag{17}\]
 
-\[\log(\mid\det(\dfrac{df}{d\mathbf{x}})\mid) = \sum_{i=1}^{d-k} \sigma_i(\mathbf{x}_{1:k}) \tag{18}\]
+\[\log(\mid\det(\dfrac{df}{d\mathbf{x}})\mid) = \sum_{i=k+1}^{d} \sigma_i(\mathbf{x}_{1:k}) \tag{18}\]
 
 <script src="https://gist.github.com/gebob19/8dc1fe38b73fd350ff63b81f5947111a.js"></script>
 
